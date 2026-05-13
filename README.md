@@ -1,38 +1,38 @@
-<p align="center">
-  <br>
-  <samp>
-    ╔══════════════════════════════════════════════════╗<br>
-    ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9608;&nbsp;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9600;<br>
-    ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9600;&#9600;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-    ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9600;&#9608;&nbsp;&#9608;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9600;<br>
-    ╚══════════════════════════════════════════════════╝
-  </samp>
-</p>
+<div align="center">
 
-<p align="center">
-  <strong>—— 终端肉鸽卡牌冒险 · Terminal Roguelike Deckbuilder ——</strong>
-</p>
+<img src="https://img.shields.io/badge/version-0.2.0-8b5cf6?style=flat-square" alt="version">
+<img src="https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square" alt="python">
+<img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square" alt="license">
+<img src="https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square" alt="tests">
+<img src="https://img.shields.io/badge/i18n-中文_|_English-f59e0b?style=flat-square" alt="i18n">
 
-<p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.0-8b5cf6?style=flat-square" alt="version">
-  <img src="https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square" alt="python">
-  <img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square" alt="license">
-  <img src="https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square" alt="tests">
-  <img src="https://img.shields.io/badge/i18n-中文_|_English-f59e0b?style=flat-square" alt="i18n">
-</p>
+</div>
 
 <br>
 
----
+<div align="center">
 
-<p align="center">
-  <a href="https://github.com/Linrane/Abyssal-Codex/wiki">📖 Wiki 维基</a> &nbsp;·&nbsp;
-  <a href="#-quick-start--快速开始">🚀 Quick Start</a> &nbsp;·&nbsp;
-  <a href="#-features--游戏特色">✨ Features</a> &nbsp;·&nbsp;
-  <a href="#-controls--操作指南">🎮 Controls</a> &nbsp;·&nbsp;
-  <a href="#-heroes--英雄">🦸 Heroes</a> &nbsp;·&nbsp;
-  <a href="#-story--剧情">📜 Story</a>
-</p>
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│      A B Y S S A L   C O D E X          │
+│          深  渊  牌  匣                 │
+│                                         │
+│    Terminal Roguelike Card Game         │
+│        终端肉鸽卡牌冒险                 │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+</div>
+
+<br>
+
+<div align="center">
+
+[📖 Wiki 维基](https://github.com/Linrane/Abyssal-Codex/wiki) · [🚀 Quick Start](#-quick-start--快速开始) · [✨ Features](#-features--游戏特色) · [🎮 Controls](#-controls--操作指南) · [🦸 Heroes](#-heroes--英雄) · [📜 Story](#-story--剧情)
+
+</div>
 
 ---
 
