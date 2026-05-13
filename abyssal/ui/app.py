@@ -9,7 +9,6 @@ Layout follows the framework spec (Section 12):
 
 import sys
 import random
-import threading
 from typing import Optional, Callable
 
 from rich.console import Console
@@ -203,78 +202,77 @@ def _intent_display(intent_type: str, value: int = 0, status: str = "", status_v
     return f"{icon} ???"
 
 
-# ── Card Widget Renderer (framework Section 3.1: 7×14 card) ────────────
+# ── Card Widget Renderer (framework Section 3.1) ──────────────────────
 
-def render_card_mini(card: Card, lang: str = "zh", selected: bool = False, playable: bool = True) -> str:
-    """Render a single card as a 7-line × 16-char mini card."""
-    cost = card.get_cost()
-    cost_str = f"{cost}⚡"
-    name = _card_name(card, lang)[:12]
-    ctype = t(f"card.type.{card.card_type.value}", lang)
-    rarity = t(f"rarity.{card.rarity.value}", lang)
-    type_str = f"[{ctype}]" if len(ctype) <= 3 else ctype[:4]
-
-    # Description
+def _short_desc(card: Card, lang: str) -> str:
+    """Get a short single-line description for a card."""
     desc = t(card.desc_key, lang)
     effects = card.get_effects()
     args = []
     for eff in effects:
         val = getattr(eff, 'value', 0) if hasattr(eff, 'value') else eff.get('value', 0)
-        if hasattr(eff, 'type'):
-            etype = eff.type
-        else:
-            etype = eff.get('type', '')
+        etype = eff.type if hasattr(eff, 'type') else eff.get('type', '')
         if etype in ("damage", "block", "heal", "apply_status", "draw", "gain_energy"):
             args.append(str(val))
     try:
         desc = desc.format(*args)
     except (IndexError, KeyError):
         pass
-    if len(desc) > 27:
-        desc = desc[:25] + ".."
-
-    color_style = CARD_TYPE_COLOR.get(card.card_type.value, COLOR_BRIGHT)
-    dim_style = COLOR_DIM if not playable else color_style
-
-    top = "┏" + "━" * 14 + "┓" if selected else "┌" + "─" * 14 + "┐"
-    bot = "┗" + "━" * 14 + "┛" if selected else "└" + "─" * 14 + "┘"
-    sel_marker = "▶" if selected else " "
-
-    lines = [
-        top,
-        f"│ {sel_marker}{name:<12} │",
-        f"│ {cost_str:<3} {type_str:<9} │",
-        f"│ {desc[:14]:<14} │",
-        f"│ {desc[14:28]:<14} │" if len(desc) > 14 else "│" + " " * 14 + "│",
-        f"│ {' ' * 14} │",
-        bot,
-    ]
-    return "\n".join(lines)
+    return desc
 
 
 def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> str:
-    """Render full hand horizontally — framework Section 3.1 / 12 bottom."""
+    """Render hand cards as Rich Table columns — CJK-safe via Rich layout."""
     if not hand:
         return ""
 
-    card_lines = []
+    table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1), show_edge=False)
+    for _ in hand:
+        table.add_column(justify="center", width=14)
+
+    # Build 3 rows: name, cost+type, short desc
+    names = []
+    costs = []
+    descs = []
     for i, card in enumerate(hand):
+        name = _card_name(card, lang)
+        if i == selected_idx:
+            name = ">>" + name
+        else:
+            name = "  " + name
         cost = card.get_cost()
         playable = cost <= energy
-        lines = render_card_mini(card, lang, selected=(i == selected_idx), playable=playable)
-        card_lines.append(lines.split("\n"))
+        cost_mark = f"[{cost}]" if playable else f"({cost})"
+        ctype = t(f"card.type.{card.card_type.value}", lang)
+        cost_str = f"{cost_mark} {ctype}"
+        short = _short_desc(card, lang)
 
-    height = 7
-    result = []
-    for row in range(height):
-        row_str = ""
-        for cl in card_lines:
-            if row < len(cl):
-                row_str += cl[row] + " "
-            else:
-                row_str += " " * 17
-        result.append(row_str)
-    return "\n".join(result)
+        names.append(name)
+        costs.append(cost_str)
+        descs.append(short)
+
+    table.add_row(*names)
+    table.add_row(*costs)
+    table.add_row(*descs)
+
+    # We can't return Rich objects directly here since the caller uses console.print()
+    # Return as string via console capture
+    from rich.console import Console as RC
+    tmp = RC(width=200)
+    with tmp.capture() as capture:
+        tmp.print(table)
+    return capture.get().rstrip()
+
+
+def render_card_mini(card: Card, lang: str = "zh", selected: bool = False, playable: bool = True) -> str:
+    """Render a single card for the reward screen — compact format."""
+    name = _card_name(card, lang)
+    if selected:
+        name = ">> " + name
+    cost = card.get_cost()
+    ctype = t(f"card.type.{card.card_type.value}", lang)
+    short = _short_desc(card, lang)
+    return f"  [{cost}] {name} ({ctype})\n     {short}"
 
 
 # ── Game Application ───────────────────────────────────────────────────
@@ -1338,26 +1336,12 @@ class GameApp:
                     box=box.ROUNDED,
                 ))
 
-            # Cards — render side by side
+            # Cards — render as list
             if card_rewards:
-                card_renders = []
-                for i, card in enumerate(card_rewards):
-                    cr = render_card_mini(card, self.lang, selected=(i == selected), playable=True)
-                    card_renders.append(cr.split("\n"))
-
-                # Combine horizontally
-                combined = []
-                for row in range(7):
-                    row_str = "    "
-                    for cr in card_renders:
-                        if row < len(cr):
-                            row_str += cr[row] + "   "
-                    combined.append(row_str)
-
                 self.console.print("")
-                for line in combined:
-                    self.console.print(Align.center(line))
-
+                for i, card in enumerate(card_rewards):
+                    rendered = render_card_mini(card, self.lang, selected=(i == selected), playable=True)
+                    self.console.print(rendered)
                 self.console.print("")
 
             controls = Text(
