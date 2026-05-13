@@ -1,0 +1,102 @@
+{
+  "events": [
+    {
+      "id": "echoing_spring",
+      "name_key": "event.echoing_spring",
+      "description_key": "event.echoing_spring.desc",
+      "floor": 1,
+      "event_type": "general",
+      "choices": [
+        {
+          "text_key": "event.echoing_spring.choice1",
+          "effects": [
+            {"type": "remove_random_card"}
+          ],
+          "result_text_key": "event.echoing_spring.result1"
+        },
+        {
+          "text_key": "event.echoing_spring.choice2",
+          "effects": [
+            {"type": "add_random_rare_card"},
+            {"type": "add_curse_card", "card_id": "doubt"}
+          ],
+          "result_text_key": "event.echoing_spring.result2"
+        }
+      ]
+    },
+    {
+      "id": "sealed_chest",
+      "name_key": "event.sealed_chest",
+      "description_key": "event.sealed_chest.desc",
+      "floor": 1,
+      "event_type": "general",
+      "choices": [
+        {
+          "text_key": "event.sealed_chest.choice1",
+          "requires": {"gold": 50},
+          "effects": [
+            {"type": "remove_gold", "value": 50},
+            {"type": "add_random_relic"}
+          ],
+          "result_text_key": "event.sealed_chest.result1"
+        },
+        {
+          "text_key": "event.sealed_chest.choice2",
+          "chance": 0.4,
+          "effects": [
+            {"type": "add_random_relic"}
+          ],
+          "result_text_key": "event.sealed_chest.result2",
+          "fail_text_key": "event.sealed_chest.fail2"
+        }
+      ]
+    },
+    {
+      "id": "fountain_of_echoes",
+      "name_key": "event.fountain_of_echoes",
+      "description_key": "event.fountain_of_echoes.desc",
+      "floor": 2,
+      "event_type": "general",
+      "choices": [
+        {
+          "text_key": "event.fountain_of_echoes.choice1",
+          "effects": [
+            {"type": "heal_percent", "value": 0.25}
+          ],
+          "result_text_key": "event.fountain_of_echoes.result1"
+        },
+        {
+          "text_key": "event.fountain_of_echoes.choice2",
+          "effects": [
+            {"type": "upgrade_random_card"}
+          ],
+          "result_text_key": "event.fountain_of_echoes.result2"
+        }
+      ]
+    },
+    {
+      "id": "shattered_mirror",
+      "name_key": "event.shattered_mirror",
+      "description_key": "event.shattered_mirror.desc",
+      "floor": 3,
+      "event_type": "general",
+      "choices": [
+        {
+          "text_key": "event.shattered_mirror.choice1",
+          "effects": [
+            {"type": "remove_curse_cards"}
+          ],
+          "result_text_key": "event.shattered_mirror.result1"
+        },
+        {
+          "text_key": "event.shattered_mirror.choice2",
+          "effects": [
+            {"type": "transform_card"},
+            {"type": "transform_card"}
+          ],
+          "result_text_key": "event.shattered_mirror.result2"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "relics": [
+    {
+      "id": "void_prism",
+      "name_key": "relic.void_prism",
+      "desc_key": "relic.void_prism.desc",
+      "tier": "boss",
+      "passive": {"max_energy": 1},
+      "on_turn_end": {"effect": "top_discard_to_curse"}
+    },
+    {
+      "id": "phoenix_feather",
+      "name_key": "relic.phoenix_feather",
+      "desc_key": "relic.phoenix_feather.desc",
+      "tier": "legendary",
+      "on_death": {"effect": "revive", "value": 0.5},
+      "charges": 1,
+      "max_charges": 1
+    },
+    {
+      "id": "shackled_soul",
+      "name_key": "relic.shackled_soul",
+      "desc_key": "relic.shackled_soul.desc",
+      "tier": "common",
+      "on_combat_start": {"effect": "gain_energy", "value": 1},
+      "passive": {"max_hp": -5}
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "relics": [
+    {
+      "id": "blood_amulet",
+      "name_key": "relic.blood_amulet",
+      "desc_key": "relic.blood_amulet.desc",
+      "tier": "common",
+      "on_combat_start": {"effect": "heal", "value": 5}
+    },
+    {
+      "id": "iron_scales",
+      "name_key": "relic.iron_scales",
+      "desc_key": "relic.iron_scales.desc",
+      "tier": "common",
+      "on_combat_start": {"effect": "block", "value": 5}
+    },
+    {
+      "id": "ancient_tome",
+      "name_key": "relic.ancient_tome",
+      "desc_key": "relic.ancient_tome.desc",
+      "tier": "common",
+      "passive": {"draw_bonus": 1}
+    },
+    {
+      "id": "poison_vial",
+      "name_key": "relic.poison_vial",
+      "desc_key": "relic.poison_vial.desc",
+      "tier": "common",
+      "on_turn_start": {"effect": "apply_random_enemy", "status": "poison", "value": 1}
+    },
+    {
+      "id": "lucky_coin",
+      "name_key": "relic.lucky_coin",
+      "desc_key": "relic.lucky_coin.desc",
+      "tier": "common",
+      "passive": {"shop_discount": 0.2}
+    },
+    {
+      "id": "broken_crown",
+      "name_key": "relic.broken_crown",
+      "desc_key": "relic.broken_crown.desc",
+      "tier": "common",
+      "on_skip_reward": {"effect": "gain_gold", "value": 20}
+    },
+    {
+      "id": "snake_skin",
+      "name_key": "relic.snake_skin",
+      "desc_key": "relic.snake_skin.desc",
+      "tier": "common",
+      "charges": 1,
+      "max_charges": 1,
+      "on_combat_start": {"effect": "refresh_charges"}
+    }
+  ]
+}

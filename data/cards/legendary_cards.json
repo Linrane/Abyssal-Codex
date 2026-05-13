@@ -1,0 +1,69 @@
+{
+  "cards": [
+    {
+      "id": "abyssal_judgment",
+      "name_key": "card.abyssal_judgment",
+      "desc_key": "card.abyssal_judgment.desc",
+      "card_type": "legendary",
+      "rarity": "legendary",
+      "cost": 3,
+      "target": "all_enemies",
+      "effects": [
+        {"type": "damage", "value": 25},
+        {"type": "apply_status", "status": "vulnerable", "duration": 3, "value": 3}
+      ],
+      "upgraded": false,
+      "upgraded_cost": 3,
+      "upgraded_effects": [
+        {"type": "damage", "value": 35},
+        {"type": "apply_status", "status": "vulnerable", "duration": 3, "value": 5}
+      ],
+      "character_class": "neutral",
+      "keywords": ["vulnerable"]
+    },
+    {
+      "id": "shadow_dance",
+      "name_key": "card.shadow_dance",
+      "desc_key": "card.shadow_dance.desc",
+      "card_type": "legendary",
+      "rarity": "legendary",
+      "cost": 2,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "dodge", "duration": 1, "value": 3},
+        {"type": "draw", "value": 3},
+        {"type": "gain_energy", "value": 2}
+      ],
+      "upgraded": false,
+      "upgraded_cost": 2,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "dodge", "duration": 1, "value": 5},
+        {"type": "draw", "value": 3},
+        {"type": "gain_energy", "value": 3}
+      ],
+      "character_class": "neutral",
+      "keywords": ["dodge"]
+    },
+    {
+      "id": "astral_collapse",
+      "name_key": "card.astral_collapse",
+      "desc_key": "card.astral_collapse.desc",
+      "card_type": "legendary",
+      "rarity": "legendary",
+      "cost": 3,
+      "target": "all_enemies",
+      "effects": [
+        {"type": "damage", "value": 30},
+        {"type": "apply_status", "status": "freeze", "duration": 1, "value": 1}
+      ],
+      "upgraded": false,
+      "upgraded_cost": 3,
+      "upgraded_effects": [
+        {"type": "damage", "value": 40},
+        {"type": "apply_status", "status": "freeze", "duration": 2, "value": 1}
+      ],
+      "character_class": "neutral",
+      "keywords": ["freeze"]
+    }
+  ]
+}

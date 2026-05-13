@@ -1,0 +1,57 @@
+{
+  "cards": [
+    {
+      "id": "doubt",
+      "name_key": "card.doubt",
+      "desc_key": "card.doubt.desc",
+      "card_type": "curse",
+      "rarity": "common",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "weak", "duration": 1, "value": 1}
+      ],
+      "upgraded": false,
+      "upgraded_cost": 0,
+      "upgraded_effects": [],
+      "character_class": "neutral",
+      "keywords": ["weak"],
+      "exhaust": true
+    },
+    {
+      "id": "void_echo",
+      "name_key": "card.void_echo",
+      "desc_key": "card.void_echo.desc",
+      "card_type": "curse",
+      "rarity": "common",
+      "cost": 0,
+      "target": "self",
+      "effects": [
+        {"type": "damage", "value": 3}
+      ],
+      "upgraded": false,
+      "upgraded_cost": 0,
+      "upgraded_effects": [],
+      "character_class": "neutral",
+      "exhaust": true
+    },
+    {
+      "id": "decay",
+      "name_key": "card.decay",
+      "desc_key": "card.decay.desc",
+      "card_type": "curse",
+      "rarity": "common",
+      "cost": 2,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "poison", "duration": 1, "value": 3}
+      ],
+      "upgraded": false,
+      "upgraded_cost": 0,
+      "upgraded_effects": [],
+      "character_class": "neutral",
+      "keywords": ["poison"],
+      "exhaust": true
+    }
+  ]
+}

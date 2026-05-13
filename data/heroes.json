@@ -1,0 +1,69 @@
+{
+  "heroes": [
+    {
+      "id": "knight",
+      "name_key": "hero.knight",
+      "desc_key": "hero.knight_desc",
+      "max_hp": 80,
+      "max_energy": 3,
+      "core_mechanic_key": "kw.vulnerable",
+      "starting_deck": ["strike", "strike", "strike", "strike", "strike", "defend", "defend", "defend", "defend", "heavy_blow"],
+      "starting_relic": "",
+      "unlocked": true,
+      "unlock_condition": "",
+      "keywords": ["vulnerable", "armor_break"]
+    },
+    {
+      "id": "weaver",
+      "name_key": "hero.weaver",
+      "desc_key": "hero.weaver_desc",
+      "max_hp": 65,
+      "max_energy": 3,
+      "core_mechanic_key": "kw.poison",
+      "starting_deck": ["strike", "strike", "strike", "strike", "strike", "defend", "defend", "defend", "defend", "poison_blade"],
+      "starting_relic": "",
+      "unlocked": true,
+      "unlock_condition": "",
+      "keywords": ["poison", "dodge"]
+    },
+    {
+      "id": "sage",
+      "name_key": "hero.sage",
+      "desc_key": "hero.sage_desc",
+      "max_hp": 60,
+      "max_energy": 4,
+      "core_mechanic_key": "kw.charge",
+      "starting_deck": ["strike", "strike", "strike", "defend", "defend", "defend", "defend", "charge_strike", "charge_strike", "thunder_clap"],
+      "starting_relic": "ancient_tome",
+      "unlocked": false,
+      "unlock_condition": "defeat_10_bosses",
+      "keywords": ["charge", "resonance"]
+    },
+    {
+      "id": "blood",
+      "name_key": "hero.blood",
+      "desc_key": "hero.blood_desc",
+      "max_hp": 55,
+      "max_energy": 3,
+      "core_mechanic_key": "kw.bloodrage",
+      "starting_deck": ["strike", "strike", "strike", "strike", "defend", "defend", "defend", "blood_pact", "life_drain", "berserk"],
+      "starting_relic": "blood_amulet",
+      "unlocked": false,
+      "unlock_condition": "use_20_powers",
+      "keywords": ["bloodrage"]
+    },
+    {
+      "id": "swordmaster",
+      "name_key": "hero.swordmaster",
+      "desc_key": "hero.swordmaster_desc",
+      "max_hp": 70,
+      "max_energy": 3,
+      "core_mechanic_key": "kw.stance",
+      "starting_deck": ["strike", "strike", "strike", "strike", "defend", "defend", "defend", "defend", "counter_stance", "iaido_slash"],
+      "starting_relic": "",
+      "unlocked": false,
+      "unlock_condition": "broken_blade_event",
+      "keywords": ["stance"]
+    }
+  ]
+}
