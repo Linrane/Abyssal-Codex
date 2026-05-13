@@ -9,7 +9,6 @@
       "cost": 1,
       "target": "single_enemy",
       "effects": [{"type": "damage", "value": 6}],
-      "upgraded": false,
       "upgraded_cost": 1,
       "upgraded_effects": [{"type": "damage", "value": 9}],
       "character_class": "neutral"
@@ -23,7 +22,6 @@
       "cost": 1,
       "target": "self",
       "effects": [{"type": "block", "value": 5}],
-      "upgraded": false,
       "upgraded_cost": 1,
       "upgraded_effects": [{"type": "block", "value": 8}],
       "character_class": "neutral"
@@ -40,7 +38,6 @@
         {"type": "damage", "value": 14},
         {"type": "apply_status", "status": "vulnerable", "duration": 2, "value": 1}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "damage", "value": 18},
@@ -61,7 +58,6 @@
         {"type": "damage", "value": 4},
         {"type": "apply_status", "status": "poison", "duration": 1, "value": 2}
       ],
-      "upgraded": false,
       "upgraded_cost": 1,
       "upgraded_effects": [
         {"type": "damage", "value": 6},
@@ -82,7 +78,6 @@
         {"type": "damage", "value": 8},
         {"type": "block", "value": 5}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "damage", "value": 10},
@@ -102,7 +97,6 @@
         {"type": "block", "value": 4},
         {"type": "apply_status", "status": "dodge", "duration": 1, "value": 1}
       ],
-      "upgraded": false,
       "upgraded_cost": 1,
       "upgraded_effects": [
         {"type": "block", "value": 6},
@@ -123,7 +117,6 @@
         {"type": "damage", "value": 12},
         {"type": "apply_status", "status": "vulnerable", "duration": 2, "value": 2}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "damage", "value": 16},
@@ -144,7 +137,6 @@
         {"type": "block", "value": 10},
         {"type": "apply_status", "status": "thorns", "duration": 2, "value": 3}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "block", "value": 13},
@@ -161,14 +153,9 @@
       "rarity": "rare",
       "cost": 1,
       "target": "single_enemy",
-      "effects": [
-        {"type": "multi_hit", "value": 3, "secondary_value": 3}
-      ],
-      "upgraded": false,
+      "effects": [{"type": "multi_hit", "value": 3, "secondary_value": 3}],
       "upgraded_cost": 1,
-      "upgraded_effects": [
-        {"type": "multi_hit", "value": 4, "secondary_value": 3}
-      ],
+      "upgraded_effects": [{"type": "multi_hit", "value": 4, "secondary_value": 3}],
       "character_class": "neutral"
     },
     {
@@ -183,7 +170,6 @@
         {"type": "damage", "value": 8},
         {"type": "apply_status", "status": "poison", "duration": 1, "value": 4}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "damage", "value": 10},
@@ -204,7 +190,6 @@
         {"type": "apply_status", "status": "dodge", "duration": 1, "value": 2},
         {"type": "draw", "value": 1}
       ],
-      "upgraded": false,
       "upgraded_cost": 1,
       "upgraded_effects": [
         {"type": "apply_status", "status": "dodge", "duration": 1, "value": 2},
@@ -225,7 +210,6 @@
         {"type": "damage", "value": 10},
         {"type": "apply_status", "status": "vulnerable", "duration": 1, "value": 1}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "damage", "value": 14},
@@ -246,7 +230,6 @@
         {"type": "block", "value": 7},
         {"type": "apply_status", "status": "freeze", "duration": 1, "value": 1}
       ],
-      "upgraded": false,
       "upgraded_cost": 2,
       "upgraded_effects": [
         {"type": "block", "value": 10},
@@ -254,6 +237,399 @@
       ],
       "character_class": "neutral",
       "keywords": ["freeze"]
+    },
+    {
+      "id": "cleave",
+      "name_key": "card.cleave",
+      "desc_key": "card.cleave.desc",
+      "card_type": "attack",
+      "rarity": "common",
+      "cost": 1,
+      "target": "all_enemies",
+      "effects": [{"type": "damage", "value": 4}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "damage", "value": 7}],
+      "character_class": "neutral"
+    },
+    {
+      "id": "quick_slash",
+      "name_key": "card.quick_slash",
+      "desc_key": "card.quick_slash.desc",
+      "card_type": "attack",
+      "rarity": "common",
+      "cost": 0,
+      "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 3}],
+      "upgraded_cost": 0,
+      "upgraded_effects": [{"type": "damage", "value": 5}],
+      "character_class": "neutral"
+    },
+    {
+      "id": "power_strike",
+      "name_key": "card.power_strike",
+      "desc_key": "card.power_strike.desc",
+      "card_type": "attack",
+      "rarity": "common",
+      "cost": 2,
+      "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 10}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage", "value": 14}],
+      "character_class": "neutral"
+    },
+    {
+      "id": "tactical_retreat",
+      "name_key": "card.tactical_retreat",
+      "desc_key": "card.tactical_retreat.desc",
+      "card_type": "skill",
+      "rarity": "common",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "block", "value": 6},
+        {"type": "draw", "value": 1}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "block", "value": 8},
+        {"type": "draw", "value": 2}
+      ],
+      "character_class": "neutral"
+    },
+    {
+      "id": "adrenaline",
+      "name_key": "card.adrenaline",
+      "desc_key": "card.adrenaline.desc",
+      "card_type": "skill",
+      "rarity": "rare",
+      "cost": 0,
+      "target": "self",
+      "effects": [
+        {"type": "gain_energy", "value": 1},
+        {"type": "draw", "value": 2}
+      ],
+      "upgraded_cost": 0,
+      "upgraded_effects": [
+        {"type": "gain_energy", "value": 2},
+        {"type": "draw", "value": 2}
+      ],
+      "character_class": "neutral"
+    },
+    {
+      "id": "whirlwind",
+      "name_key": "card.whirlwind",
+      "desc_key": "card.whirlwind.desc",
+      "card_type": "attack",
+      "rarity": "rare",
+      "cost": 3,
+      "target": "all_enemies",
+      "effects": [{"type": "damage", "value": 8}],
+      "upgraded_cost": 3,
+      "upgraded_effects": [{"type": "damage", "value": 12}],
+      "character_class": "neutral"
+    },
+    {
+      "id": "parry",
+      "name_key": "card.parry",
+      "desc_key": "card.parry.desc",
+      "card_type": "skill",
+      "rarity": "common",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "block", "value": 3},
+        {"type": "apply_status", "status": "thorns", "duration": 1, "value": 2}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "block", "value": 5},
+        {"type": "apply_status", "status": "thorns", "duration": 1, "value": 3}
+      ],
+      "character_class": "neutral",
+      "keywords": ["thorns"]
+    },
+    {
+      "id": "execute",
+      "name_key": "card.execute",
+      "desc_key": "card.execute.desc",
+      "card_type": "attack",
+      "rarity": "rare",
+      "cost": 2,
+      "target": "single_enemy",
+      "effects": [
+        {"type": "damage", "value": 10},
+        {"type": "conditional_damage", "condition": "hp_below_50", "condition_value": 50, "value": 10}
+      ],
+      "upgraded_cost": 2,
+      "upgraded_effects": [
+        {"type": "damage", "value": 12},
+        {"type": "conditional_damage", "condition": "hp_below_50", "condition_value": 50, "value": 15}
+      ],
+      "character_class": "neutral"
+    },
+    {
+      "id": "battle_cry",
+      "name_key": "card.battle_cry",
+      "desc_key": "card.battle_cry.desc",
+      "card_type": "power",
+      "rarity": "rare",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "strength", "duration": 999, "value": 2}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "strength", "duration": 999, "value": 3}
+      ],
+      "character_class": "neutral",
+      "keywords": ["strength"]
+    },
+    {
+      "id": "regen_vial",
+      "name_key": "card.regen_vial",
+      "desc_key": "card.regen_vial.desc",
+      "card_type": "skill",
+      "rarity": "common",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "regen", "duration": 3, "value": 3}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "regen", "duration": 4, "value": 4}
+      ],
+      "character_class": "neutral",
+      "keywords": ["regen"]
+    },
+    {
+      "id": "fortify",
+      "name_key": "card.fortify",
+      "desc_key": "card.fortify.desc",
+      "card_type": "power",
+      "rarity": "common",
+      "cost": 2,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "metallic", "duration": 999, "value": 3}
+      ],
+      "upgraded_cost": 2,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "metallic", "duration": 999, "value": 5}
+      ],
+      "character_class": "neutral",
+      "keywords": ["metallic"]
+    },
+    {
+      "id": "backstab",
+      "name_key": "card.backstab",
+      "desc_key": "card.backstab.desc",
+      "card_type": "attack",
+      "rarity": "common",
+      "cost": 1,
+      "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 5}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "damage", "value": 8}],
+      "character_class": "neutral",
+      "innate": true,
+      "exhaust": true
+    },
+    {
+      "id": "meditation",
+      "name_key": "card.meditation",
+      "desc_key": "card.meditation.desc",
+      "card_type": "skill",
+      "rarity": "rare",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "heal", "value": 4},
+        {"type": "draw", "value": 1}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "heal", "value": 6},
+        {"type": "draw", "value": 2}
+      ],
+      "character_class": "neutral"
+    },
+    {
+      "id": "enrage",
+      "name_key": "card.enrage",
+      "desc_key": "card.enrage.desc",
+      "card_type": "power",
+      "rarity": "rare",
+      "cost": 1,
+      "target": "self",
+      "effects": [
+        {"type": "gain_energy", "value": 2},
+        {"type": "apply_status", "status": "vulnerable", "duration": 2, "value": 2}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "gain_energy", "value": 3},
+        {"type": "apply_status", "status": "vulnerable", "duration": 2, "value": 2}
+      ],
+      "character_class": "neutral",
+      "keywords": ["vulnerable"]
+    },
+    {
+      "id": "ghost_armor",
+      "name_key": "card.ghost_armor",
+      "desc_key": "card.ghost_armor.desc",
+      "card_type": "power",
+      "rarity": "epic",
+      "cost": 2,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "intangible", "duration": 1, "value": 1}
+      ],
+      "upgraded_cost": 2,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "intangible", "duration": 2, "value": 1}
+      ],
+      "character_class": "neutral",
+      "keywords": ["intangible"],
+      "exhaust": true
+    },
+    {
+      "id": "reckless_charge",
+      "name_key": "card.reckless_charge",
+      "desc_key": "card.reckless_charge.desc",
+      "card_type": "attack",
+      "rarity": "rare",
+      "cost": 1,
+      "target": "single_enemy",
+      "effects": [
+        {"type": "damage", "value": 12},
+        {"type": "damage_self", "value": 3}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "damage", "value": 16},
+        {"type": "damage_self", "value": 3}
+      ],
+      "character_class": "neutral"
+    },
+    {
+      "id": "disarm",
+      "name_key": "card.disarm",
+      "desc_key": "card.disarm.desc",
+      "card_type": "skill",
+      "rarity": "rare",
+      "cost": 1,
+      "target": "single_enemy",
+      "effects": [
+        {"type": "apply_status", "status": "weak", "duration": 2, "value": 2}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "weak", "duration": 3, "value": 3}
+      ],
+      "character_class": "neutral",
+      "keywords": ["weak"],
+      "exhaust": true
+    },
+    {
+      "id": "chain_lightning",
+      "name_key": "card.chain_lightning",
+      "desc_key": "card.chain_lightning.desc",
+      "card_type": "attack",
+      "rarity": "epic",
+      "cost": 2,
+      "target": "all_enemies",
+      "effects": [
+        {"type": "damage", "value": 7},
+        {"type": "apply_status", "status": "charge", "duration": 999, "value": 3}
+      ],
+      "upgraded_cost": 2,
+      "upgraded_effects": [
+        {"type": "damage", "value": 10},
+        {"type": "apply_status", "status": "charge", "duration": 999, "value": 4}
+      ],
+      "character_class": "neutral",
+      "keywords": ["charge"]
+    },
+    {
+      "id": "bandage",
+      "name_key": "card.bandage",
+      "desc_key": "card.bandage.desc",
+      "card_type": "skill",
+      "rarity": "common",
+      "cost": 1,
+      "target": "self",
+      "effects": [{"type": "heal", "value": 4}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "heal", "value": 7}],
+      "character_class": "neutral",
+      "exhaust": true
+    },
+    {
+      "id": "smokescreen",
+      "name_key": "card.smokescreen",
+      "desc_key": "card.smokescreen.desc",
+      "card_type": "skill",
+      "rarity": "common",
+      "cost": 1,
+      "target": "single_enemy",
+      "effects": [
+        {"type": "apply_status", "status": "weak", "duration": 1, "value": 1}
+      ],
+      "upgraded_cost": 1,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "weak", "duration": 2, "value": 1}
+      ],
+      "character_class": "neutral",
+      "keywords": ["weak"]
+    },
+    {
+      "id": "berserker_rage",
+      "name_key": "card.berserker_rage",
+      "desc_key": "card.berserker_rage.desc",
+      "card_type": "power",
+      "rarity": "epic",
+      "cost": 2,
+      "target": "self",
+      "effects": [
+        {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 2},
+        {"type": "heal", "value": 6}
+      ],
+      "upgraded_cost": 2,
+      "upgraded_effects": [
+        {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 3},
+        {"type": "heal", "value": 8}
+      ],
+      "character_class": "neutral",
+      "keywords": ["bloodrage"]
+    },
+    {
+      "id": "meteor_strike",
+      "name_key": "card.meteor_strike",
+      "desc_key": "card.meteor_strike.desc",
+      "card_type": "attack",
+      "rarity": "epic",
+      "cost": 3,
+      "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 28}],
+      "upgraded_cost": 3,
+      "upgraded_effects": [{"type": "damage", "value": 36}],
+      "character_class": "neutral"
+    },
+    {
+      "id": "preparation",
+      "name_key": "card.preparation",
+      "desc_key": "card.preparation.desc",
+      "card_type": "skill",
+      "rarity": "common",
+      "cost": 0,
+      "target": "self",
+      "effects": [{"type": "draw", "value": 1}],
+      "upgraded_cost": 0,
+      "upgraded_effects": [{"type": "draw", "value": 2}],
+      "character_class": "neutral",
+      "exhaust": true
     }
   ]
 }

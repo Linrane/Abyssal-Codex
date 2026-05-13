@@ -1,6 +1,7 @@
 """Rich-based terminal application shell with keyboard input handling."""
 
 import sys
+import random
 import threading
 from typing import Optional, Callable
 
@@ -836,7 +837,3 @@ def _status_line(combatant) -> str:
             icon = icons.get(name, "•")
             parts.append(f"{icon}:{status.stacks}")
     return " ".join(parts)
-
-
-# Need to import random for reward generation
-import random

@@ -1,102 +1,91 @@
 {
   "events": [
-    {
-      "id": "echoing_spring",
-      "name_key": "event.echoing_spring",
-      "description_key": "event.echoing_spring.desc",
-      "floor": 1,
-      "event_type": "general",
-      "choices": [
-        {
-          "text_key": "event.echoing_spring.choice1",
-          "effects": [
-            {"type": "remove_random_card"}
-          ],
-          "result_text_key": "event.echoing_spring.result1"
-        },
-        {
-          "text_key": "event.echoing_spring.choice2",
-          "effects": [
-            {"type": "add_random_rare_card"},
-            {"type": "add_curse_card", "card_id": "doubt"}
-          ],
-          "result_text_key": "event.echoing_spring.result2"
-        }
-      ]
-    },
-    {
-      "id": "sealed_chest",
-      "name_key": "event.sealed_chest",
-      "description_key": "event.sealed_chest.desc",
-      "floor": 1,
-      "event_type": "general",
-      "choices": [
-        {
-          "text_key": "event.sealed_chest.choice1",
-          "requires": {"gold": 50},
-          "effects": [
-            {"type": "remove_gold", "value": 50},
-            {"type": "add_random_relic"}
-          ],
-          "result_text_key": "event.sealed_chest.result1"
-        },
-        {
-          "text_key": "event.sealed_chest.choice2",
-          "chance": 0.4,
-          "effects": [
-            {"type": "add_random_relic"}
-          ],
-          "result_text_key": "event.sealed_chest.result2",
-          "fail_text_key": "event.sealed_chest.fail2"
-        }
-      ]
-    },
-    {
-      "id": "fountain_of_echoes",
-      "name_key": "event.fountain_of_echoes",
-      "description_key": "event.fountain_of_echoes.desc",
-      "floor": 2,
-      "event_type": "general",
-      "choices": [
-        {
-          "text_key": "event.fountain_of_echoes.choice1",
-          "effects": [
-            {"type": "heal_percent", "value": 0.25}
-          ],
-          "result_text_key": "event.fountain_of_echoes.result1"
-        },
-        {
-          "text_key": "event.fountain_of_echoes.choice2",
-          "effects": [
-            {"type": "upgrade_random_card"}
-          ],
-          "result_text_key": "event.fountain_of_echoes.result2"
-        }
-      ]
-    },
-    {
-      "id": "shattered_mirror",
-      "name_key": "event.shattered_mirror",
-      "description_key": "event.shattered_mirror.desc",
-      "floor": 3,
-      "event_type": "general",
-      "choices": [
-        {
-          "text_key": "event.shattered_mirror.choice1",
-          "effects": [
-            {"type": "remove_curse_cards"}
-          ],
-          "result_text_key": "event.shattered_mirror.result1"
-        },
-        {
-          "text_key": "event.shattered_mirror.choice2",
-          "effects": [
-            {"type": "transform_card"},
-            {"type": "transform_card"}
-          ],
-          "result_text_key": "event.shattered_mirror.result2"
-        }
-      ]
-    }
+    {"id":"echoing_spring","name_key":"event.echoing_spring","description_key":"event.echoing_spring.desc","floor":1,"event_type":"general",
+      "choices":[
+        {"text_key":"event.echoing_spring.choice1","effects":[{"type":"remove_random_card"}],"result_text_key":"event.echoing_spring.result1"},
+        {"text_key":"event.echoing_spring.choice2","effects":[{"type":"add_random_rare_card"},{"type":"add_curse_card","card_id":"doubt"}],"result_text_key":"event.echoing_spring.result2"}
+      ]},
+    {"id":"sealed_chest","name_key":"event.sealed_chest","description_key":"event.sealed_chest.desc","floor":1,"event_type":"general",
+      "choices":[
+        {"text_key":"event.sealed_chest.choice1","requires":{"gold":50},"effects":[{"type":"remove_gold","value":50},{"type":"add_random_relic"}],"result_text_key":"event.sealed_chest.result1"},
+        {"text_key":"event.sealed_chest.choice2","chance":0.4,"effects":[{"type":"add_random_relic"}],"result_text_key":"event.sealed_chest.result2","fail_text_key":"event.sealed_chest.fail2"}
+      ]},
+    {"id":"fountain_of_echoes","name_key":"event.fountain_of_echoes","description_key":"event.fountain_of_echoes.desc","floor":2,"event_type":"general",
+      "choices":[
+        {"text_key":"event.fountain_of_echoes.choice1","effects":[{"type":"heal_percent","value":0.25}],"result_text_key":"event.fountain_of_echoes.result1"},
+        {"text_key":"event.fountain_of_echoes.choice2","effects":[{"type":"upgrade_random_card"}],"result_text_key":"event.fountain_of_echoes.result2"}
+      ]},
+    {"id":"shattered_mirror","name_key":"event.shattered_mirror","description_key":"event.shattered_mirror.desc","floor":3,"event_type":"general",
+      "choices":[
+        {"text_key":"event.shattered_mirror.choice1","effects":[{"type":"remove_curse_cards"}],"result_text_key":"event.shattered_mirror.result1"},
+        {"text_key":"event.shattered_mirror.choice2","effects":[{"type":"transform_card"},{"type":"transform_card"}],"result_text_key":"event.shattered_mirror.result2"}
+      ]},
+    {"id":"wandering_merchant","name_key":"event.wandering_merchant","description_key":"event.wandering_merchant.desc","floor":1,"event_type":"general",
+      "choices":[
+        {"text_key":"event.wandering_merchant.choice1","requires":{"gold":30},"effects":[{"type":"remove_gold","value":30},{"type":"add_random_card"}],"result_text_key":"event.wandering_merchant.result1"},
+        {"text_key":"event.wandering_merchant.choice2","effects":[],"result_text_key":"event.wandering_merchant.result2"}
+      ]},
+    {"id":"abyssal_altar","name_key":"event.abyssal_altar","description_key":"event.abyssal_altar.desc","floor":2,"event_type":"general",
+      "choices":[
+        {"text_key":"event.abyssal_altar.choice1","effects":[{"type":"remove_gold","value":25},{"type":"heal_percent","value":0.3}],"result_text_key":"event.abyssal_altar.result1"},
+        {"text_key":"event.abyssal_altar.choice2","effects":[{"type":"add_curse_card","card_id":"void_echo"},{"type":"add_random_rare_card"},{"type":"add_random_rare_card"}],"result_text_key":"event.abyssal_altar.result2"}
+      ]},
+    {"id":"fallen_hero","name_key":"event.fallen_hero","description_key":"event.fallen_hero.desc","floor":2,"event_type":"story","story_flag_set":"met_fallen_hero",
+      "choices":[
+        {"text_key":"event.fallen_hero.choice1","effects":[{"type":"add_random_relic"}],"result_text_key":"event.fallen_hero.result1"},
+        {"text_key":"event.fallen_hero.choice2","effects":[{"type":"heal_percent","value":0.35}],"result_text_key":"event.fallen_hero.result2"}
+      ]},
+    {"id":"void_whispers","name_key":"event.void_whispers","description_key":"event.void_whispers.desc","floor":3,"event_type":"story","story_flag_set":"heard_whispers",
+      "choices":[
+        {"text_key":"event.void_whispers.choice1","effects":[{"type":"add_random_legendary_card"},{"type":"damage","value":10}],"result_text_key":"event.void_whispers.result1"},
+        {"text_key":"event.void_whispers.choice2","effects":[],"result_text_key":"event.void_whispers.result2"},
+        {"text_key":"event.void_whispers.choice3","effects":[{"type":"heal_percent","value":0.5}],"result_text_key":"event.void_whispers.result3"}
+      ]},
+    {"id":"sanctum_library","name_key":"event.sanctum_library","description_key":"event.sanctum_library.desc","floor":1,"event_type":"general",
+      "choices":[
+        {"text_key":"event.sanctum_library.choice1","effects":[{"type":"upgrade_random_card"}],"result_text_key":"event.sanctum_library.result1"},
+        {"text_key":"event.sanctum_library.choice2","effects":[{"type":"add_random_relic"},{"type":"add_curse_card","card_id":"shame"}],"result_text_key":"event.sanctum_library.result2"}
+      ]},
+    {"id":"ghostly_smith","name_key":"event.ghostly_smith","description_key":"event.ghostly_smith.desc","floor":2,"event_type":"general",
+      "choices":[
+        {"text_key":"event.ghostly_smith.choice1","effects":[{"type":"upgrade_random_card"},{"type":"upgrade_random_card"}],"result_text_key":"event.ghostly_smith.result1"},
+        {"text_key":"event.ghostly_smith.choice2","effects":[{"type":"add_random_relic"}],"result_text_key":"event.ghostly_smith.result2"}
+      ]},
+    {"id":"mercy_of_the_void","name_key":"event.mercy_of_the_void","description_key":"event.mercy_of_the_void.desc","floor":3,"event_type":"story","story_flag_set":"accepted_void_mercy",
+      "choices":[
+        {"text_key":"event.mercy_of_the_void.choice1","effects":[{"type":"heal_percent","value":0.5},{"type":"remove_curse_cards"}],"result_text_key":"event.mercy_of_the_void.result1"},
+        {"text_key":"event.mercy_of_the_void.choice2","effects":[{"type":"add_random_legendary_card"},{"type":"add_curse_card","card_id":"abyssal_rot"}],"result_text_key":"event.mercy_of_the_void.result2"}
+      ]},
+    {"id":"broken_blade","name_key":"event.broken_blade","description_key":"event.broken_blade.desc","floor":2,"event_type":"class_specific","character_class":"swordmaster","story_flag_set":"broken_blade_event",
+      "choices":[
+        {"text_key":"event.broken_blade.choice1","effects":[{"type":"add_specific_card","card_id":"dragon_strike"},{"type":"heal_percent","value":0.2}],"result_text_key":"event.broken_blade.result1"}
+      ]},
+    {"id":"blood_moon","name_key":"event.blood_moon","description_key":"event.blood_moon.desc","floor":2,"event_type":"class_specific","character_class":"blood",
+      "choices":[
+        {"text_key":"event.blood_moon.choice1","effects":[{"type":"damage_self","value":10},{"type":"add_specific_card","card_id":"crimson_pact"}],"result_text_key":"event.blood_moon.result1"}
+      ]},
+    {"id":"runic_circle","name_key":"event.runic_circle","description_key":"event.runic_circle.desc","floor":2,"event_type":"class_specific","character_class":"sage",
+      "choices":[
+        {"text_key":"event.runic_circle.choice1","effects":[{"type":"add_specific_card","card_id":"resonance_blast"}],"result_text_key":"event.runic_circle.result1"}
+      ]},
+    {"id":"sacred_armory","name_key":"event.sacred_armory","description_key":"event.sacred_armory.desc","floor":1,"event_type":"class_specific","character_class":"knight",
+      "choices":[
+        {"text_key":"event.sacred_armory.choice1","effects":[{"type":"add_specific_card","card_id":"holy_nova"}],"result_text_key":"event.sacred_armory.result1"}
+      ]},
+    {"id":"twelve_souls_shrine","name_key":"event.twelve_souls_shrine","description_key":"event.twelve_souls_shrine.desc","floor":3,"event_type":"story","story_flag_required":"met_fallen_hero","story_flag_set":"freed_twelve_souls",
+      "choices":[
+        {"text_key":"event.twelve_souls_shrine.choice1","effects":[{"type":"heal_percent","value":1.0},{"type":"add_random_legendary_card"}],"result_text_key":"event.twelve_souls_shrine.result1"},
+        {"text_key":"event.twelve_souls_shrine.choice2","effects":[{"type":"add_random_relic"},{"type":"add_random_relic"}],"result_text_key":"event.twelve_souls_shrine.result2"}
+      ]},
+    {"id":"old_god_offering","name_key":"event.old_god_offering","description_key":"event.old_god_offering.desc","floor":3,"event_type":"story","story_flag_required":"heard_whispers","story_flag_set":"defeated_old_god",
+      "choices":[
+        {"text_key":"event.old_god_offering.choice1","effects":[{"type":"add_random_legendary_card"},{"type":"damage_self","value":15}],"result_text_key":"event.old_god_offering.result1"},
+        {"text_key":"event.old_god_offering.choice2","effects":[{"type":"heal_percent","value":0.4}],"result_text_key":"event.old_god_offering.result2"}
+      ]},
+    {"id":"seal_of_truth","name_key":"event.seal_of_truth","description_key":"event.seal_of_truth.desc","floor":3,"event_type":"story","story_flag_set":"consumed_abyss",
+      "choices":[
+        {"text_key":"event.seal_of_truth.choice1","effects":[{"type":"damage_self","value":20},{"type":"add_random_legendary_card"},{"type":"gain_gold","value":100}],"result_text_key":"event.seal_of_truth.result1"},
+        {"text_key":"event.seal_of_truth.choice2","effects":[{"type":"upgrade_random_card"},{"type":"upgrade_random_card"},{"type":"upgrade_random_card"}],"result_text_key":"event.seal_of_truth.result2"}
+      ]}
   ]
 }

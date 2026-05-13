@@ -1,80 +1,20 @@
 {
   "enemies": [
-    {
-      "id": "vine_horror",
-      "name_key": "enemy.vine_horror",
-      "desc_key": "enemy.vine_horror.desc",
-      "max_hp": 42,
-      "base_damage": 6,
-      "floor": 2,
-      "enemy_type": "normal",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 6},
-            {"type": "skill", "status": "poison", "status_value": 2},
-            {"type": "attack", "value": 6}
-          ]
-        }
-      ],
-      "keywords": ["poison"],
-      "rewards": {"gold": 15, "card_chance": 0.6, "relic_chance": 0.15}
-    },
-    {
-      "id": "shadow_hunter",
-      "name_key": "enemy.shadow_hunter",
-      "desc_key": "enemy.shadow_hunter.desc",
-      "max_hp": 38,
-      "base_damage": 9,
-      "floor": 2,
-      "enemy_type": "normal",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "skill", "status": "dodge", "status_value": 2},
-            {"type": "attack", "value": 9},
-            {"type": "attack", "value": 9}
-          ]
-        }
-      ],
-      "keywords": ["dodge"],
-      "rewards": {"gold": 15, "card_chance": 0.6, "relic_chance": 0.15}
-    },
-    {
-      "id": "blight_treant",
-      "name_key": "enemy.blight_treant",
-      "desc_key": "enemy.blight_treant.desc",
-      "max_hp": 72,
-      "base_damage": 10,
-      "floor": 2,
-      "enemy_type": "boss",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 10},
-            {"type": "skill", "status": "poison", "status_value": 3},
-            {"type": "defend", "value": 12}
-          ]
-        },
-        {
-          "phase": 2,
-          "condition": "hp_below_50",
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 16},
-            {"type": "skill", "status": "poison", "status_value": 4},
-            {"type": "attack", "value": 16}
-          ]
-        }
-      ],
-      "keywords": ["poison"],
-      "rewards": {"gold": 50, "card_chance": 1.0, "relic_chance": 1.0}
-    }
+    {"id":"vine_horror","name_key":"enemy.vine_horror","desc_key":"enemy.vine_horror.desc","max_hp":42,"base_damage":6,"floor":2,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":6},{"type":"skill","status":"poison","status_value":2},{"type":"attack","value":6}]}],
+      "keywords":["poison"],"rewards":{"gold":15,"card_chance":0.6,"relic_chance":0.15}},
+    {"id":"shadow_hunter","name_key":"enemy.shadow_hunter","desc_key":"enemy.shadow_hunter.desc","max_hp":38,"base_damage":9,"floor":2,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"skill","status":"dodge","status_value":2},{"type":"attack","value":9},{"type":"attack","value":9}]}],
+      "keywords":["dodge"],"rewards":{"gold":15,"card_chance":0.6,"relic_chance":0.15}},
+    {"id":"swamp_lurker","name_key":"enemy.swamp_lurker","desc_key":"enemy.swamp_lurker.desc","max_hp":36,"base_damage":7,"floor":2,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":7},{"type":"skill","status":"weak","status_value":1},{"type":"attack","value":7}]}],
+      "keywords":["weak"],"rewards":{"gold":14,"card_chance":0.55,"relic_chance":0.15}},
+    {"id":"thorn_beast","name_key":"enemy.thorn_beast","desc_key":"enemy.thorn_beast.desc","max_hp":45,"base_damage":5,"floor":2,"enemy_type":"elite",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"skill","status":"thorns","status_value":4},{"type":"attack","value":5},{"type":"defend","value":8}]}],
+      "keywords":["thorns"],"rewards":{"gold":30,"card_chance":0.8,"relic_chance":0.3}},
+    {"id":"blight_treant","name_key":"enemy.blight_treant","desc_key":"enemy.blight_treant.desc","max_hp":72,"base_damage":10,"floor":2,"enemy_type":"boss",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":10},{"type":"skill","status":"poison","status_value":3},{"type":"defend","value":12}]},
+                   {"phase":2,"condition":"hp_below_50","pattern_type":"cycle","pattern":[{"type":"attack","value":16},{"type":"skill","status":"poison","status_value":4},{"type":"attack","value":16}]}],
+      "keywords":["poison"],"rewards":{"gold":50,"card_chance":1.0,"relic_chance":1.0}}
   ]
 }

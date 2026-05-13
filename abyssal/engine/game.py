@@ -443,6 +443,23 @@ class GameEngine:
         self._generate_floor(self.state.current_floor)
         return False  # Continue to next floor
 
+    def determine_ending(self) -> str:
+        """Determine which ending the player gets based on story flags."""
+        if not self.state:
+            return "reseal"
+
+        flags = self.state.story_flags
+        # Check endings in priority order
+        if "defeated_old_god" in flags:
+            return "deicide"
+        if "freed_twelve_souls" in flags:
+            return "liberation"
+        if "consumed_abyss" in flags:
+            return "consumption"
+        if "accepted_void_mercy" in flags:
+            return "resignation"
+        return "reseal"
+
     def calculate_memory(self) -> int:
         """Calculate Abyssal Memory earned at end of run."""
         if not self.state:
@@ -452,6 +469,53 @@ class GameEngine:
         memory += self.state.bosses_defeated * 15  # 15 per boss
         memory += self.state.encounters_completed * 3  # 3 per encounter
         return memory
+
+    def check_achievements(self) -> list[str]:
+        """Check which achievements were earned this run. Returns list of achievement IDs."""
+        if not self.state:
+            return []
+
+        earned = []
+        s = self.state
+
+        # Floor clears
+        if s.bosses_defeated >= 1:
+            earned.append("floor1_clear")
+        if s.bosses_defeated >= 2:
+            earned.append("floor2_clear")
+        if s.bosses_defeated >= 3:
+            earned.append("floor3_clear")
+            earned.append("first_win")
+
+        # Class wins
+        if s.bosses_defeated >= 3:
+            if s.hero.id == "knight":
+                earned.append("knight_win")
+            elif s.hero.id == "weaver":
+                earned.append("weaver_win")
+
+        # Deck size
+        if len(s.deck) >= 30:
+            earned.append("huge_deck")
+        if len(s.deck) <= 10 and s.bosses_defeated >= 3:
+            earned.append("thin_deck")
+
+        # Wealth
+        if s.gold_total >= 500:
+            earned.append("rich")
+
+        # Relic count
+        if len(s.relics) >= 10:
+            earned.append("many_relics")
+
+        # Ending achievements
+        ending = self.determine_ending()
+        if ending == "liberation":
+            earned.append("liberation_end")
+        elif ending == "deicide":
+            earned.append("deicide_end")
+
+        return earned
 
     def to_dict(self) -> dict:
         """Serialize run state to a dictionary for saving."""

@@ -145,3 +145,49 @@ class TestEffectResolver:
         result = resolver.resolve("apply_status", status="vulnerable", value=2, duration=2, target_type="single_enemy", target_index=0)
         assert enemy.has_status("vulnerable")
         assert enemy.get_status_stacks("vulnerable") == 2
+
+
+class TestStrength:
+    def test_strength_adds_flat_damage(self):
+        attacker = Combatant("attacker", max_hp=50)
+        defender = Combatant("defender", max_hp=80)
+        attacker.apply_status(StatusType.STRENGTH, 3)
+        defender.take_damage(10, attacker)
+        assert defender.hp == 67  # 80 - (10 + 3) = 67
+
+    def test_strength_stacks(self):
+        attacker = Combatant("attacker", max_hp=50)
+        defender = Combatant("defender", max_hp=80)
+        attacker.apply_status(StatusType.STRENGTH, 5)
+        defender.take_damage(10, attacker)
+        assert defender.hp == 65  # 80 - 15
+
+
+class TestMetallic:
+    def test_metallic_gives_block_per_turn(self):
+        c = Combatant("test", max_hp=50)
+        c.apply_status(StatusType.METALLIC, 4)
+        c.tick_statuses()
+        assert c.block == 4
+
+    def test_metallic_stacks_accumulate_block(self):
+        c = Combatant("test", max_hp=50)
+        c.apply_status(StatusType.METALLIC, 3)
+        c.tick_statuses()
+        assert c.block == 3
+        c.tick_statuses()
+        assert c.block == 6  # accumulates
+
+
+class TestIntangible:
+    def test_intangible_reduces_damage_to_one(self):
+        c = Combatant("test", max_hp=50)
+        c.apply_status(StatusType.INTANGIBLE, 1)
+        c.take_damage(30)
+        assert c.hp == 49  # damage reduced to 1
+
+    def test_intangible_does_not_reduce_one_damage(self):
+        c = Combatant("test", max_hp=50)
+        c.apply_status(StatusType.INTANGIBLE, 1)
+        c.take_damage(1)
+        assert c.hp == 49  # still takes 1

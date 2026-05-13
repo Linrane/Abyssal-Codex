@@ -1,6 +1,7 @@
 """Event script interpreter for event encounters."""
 
 import random
+from copy import deepcopy
 from typing import Optional
 
 from abyssal.data.events import Event, EventChoice
@@ -16,6 +17,14 @@ class EventRunner:
     def run_event(self, event: Event) -> dict:
         """Prepare an event for display. Returns event data for UI."""
         state = self.engine.state
+
+        # Check story flag prerequisites
+        if event.story_flag_required and event.story_flag_required not in state.story_flags:
+            return {"event": None, "choices": [], "blocked": True}
+
+        # Check class-specific events
+        if event.character_class and event.character_class != state.hero.id:
+            return {"event": None, "choices": [], "blocked": True}
 
         # Filter available choices
         available_choices = []
@@ -69,10 +78,25 @@ class EventRunner:
                     self.engine.add_card_to_deck(card)
                     result["effects"].append(f"Got card: {card.name_key}")
 
+            elif effect_type == "add_random_legendary_card":
+                pool = [c for c in self.engine._all_cards.values()
+                        if c.rarity.value == "legendary" and c.card_type.value != "curse"]
+                if pool:
+                    card = deepcopy(random.choice(pool))
+                    self.engine.add_card_to_deck(card)
+                    result["effects"].append(f"Got legendary: {card.name_key}")
+
             elif effect_type == "add_random_card":
                 pool = self.engine.get_card_pool()
                 if pool:
                     card = random.choice(pool)
+                    self.engine.add_card_to_deck(card)
+                    result["effects"].append(f"Got card: {card.name_key}")
+
+            elif effect_type == "add_specific_card":
+                card_id = effect.get("card_id", "")
+                if card_id in self.engine._all_cards:
+                    card = deepcopy(self.engine._all_cards[card_id])
                     self.engine.add_card_to_deck(card)
                     result["effects"].append(f"Got card: {card.name_key}")
 
@@ -111,6 +135,18 @@ class EventRunner:
                     idx = random.choice(upgradable)
                     state.deck[idx].upgraded = True
                     result["effects"].append(f"Upgraded: {state.deck[idx].name_key}")
+
+            elif effect_type == "damage":
+                state.hp = max(0, state.hp - value)
+                result["effects"].append(f"Took {value} damage")
+                if state.hp <= 0:
+                    result["death"] = True
+
+            elif effect_type == "damage_self":
+                state.hp = max(0, state.hp - value)
+                result["effects"].append(f"Lost {value} HP")
+                if state.hp <= 0:
+                    result["death"] = True
 
             elif effect_type == "gain_gold":
                 self.engine.add_gold(value)

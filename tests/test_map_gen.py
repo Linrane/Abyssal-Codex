@@ -81,3 +81,82 @@ class TestGameEngine:
         assert RoomType.BOSS in types
         # At least one of these should appear
         assert any(t in types for t in [RoomType.EVENT, RoomType.SHOP, RoomType.REST])
+
+    def test_ending_default_reseal(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        assert engine.determine_ending() == "reseal"
+
+    def test_ending_deicide(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.story_flags.add("defeated_old_god")
+        assert engine.determine_ending() == "deicide"
+
+    def test_ending_liberation(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.story_flags.add("freed_twelve_souls")
+        assert engine.determine_ending() == "liberation"
+
+    def test_ending_consumption(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.story_flags.add("consumed_abyss")
+        assert engine.determine_ending() == "consumption"
+
+    def test_ending_resignation(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.story_flags.add("accepted_void_mercy")
+        assert engine.determine_ending() == "resignation"
+
+    def test_ending_deicide_beats_liberation(self):
+        """Deicide should take priority over liberation if both flags set."""
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.story_flags.add("freed_twelve_souls")
+        engine.state.story_flags.add("defeated_old_god")
+        assert engine.determine_ending() == "deicide"
+
+    def test_achievement_floor_clears(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.bosses_defeated = 3
+        earned = engine.check_achievements()
+        assert "floor1_clear" in earned
+        assert "floor2_clear" in earned
+        assert "floor3_clear" in earned
+        assert "first_win" in earned
+
+    def test_achievement_huge_deck(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        # Pad deck to 30
+        while len(engine.state.deck) < 30:
+            engine.state.deck.append(engine.state.deck[0])
+        earned = engine.check_achievements()
+        assert "huge_deck" in earned
+
+    def test_achievement_rich(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        engine.state.gold_total = 500
+        earned = engine.check_achievements()
+        assert "rich" in earned
+
+    def test_achievement_many_relics(self):
+        engine = GameEngine()
+        engine.start_run("knight")
+        # Get any relic from the pool to pad
+        if not engine.state.relics:
+            from abyssal.data.relics import Relic, RelicTier
+            engine.state.relics.append(Relic(
+                id="test_relic", name_key="test", desc_key="test",
+                tier=RelicTier.COMMON, passive={},
+            ))
+        target = engine.state.relics[0]
+        while len(engine.state.relics) < 10:
+            engine.state.relics.append(target)
+        earned = engine.check_achievements()
+        assert "many_relics" in earned

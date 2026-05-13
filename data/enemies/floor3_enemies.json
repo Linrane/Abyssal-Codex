@@ -1,82 +1,21 @@
 {
   "enemies": [
-    {
-      "id": "void_walker",
-      "name_key": "enemy.void_walker",
-      "desc_key": "enemy.void_walker.desc",
-      "max_hp": 48,
-      "base_damage": 8,
-      "floor": 3,
-      "enemy_type": "normal",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 8},
-            {"type": "skill", "status": "weak", "status_value": 1},
-            {"type": "attack", "value": 8},
-            {"type": "defend", "value": 8}
-          ]
-        }
-      ],
-      "keywords": ["weak"],
-      "rewards": {"gold": 18, "card_chance": 0.7, "relic_chance": 0.2}
-    },
-    {
-      "id": "time_warp",
-      "name_key": "enemy.time_warp",
-      "desc_key": "enemy.time_warp.desc",
-      "max_hp": 44,
-      "base_damage": 5,
-      "floor": 3,
-      "enemy_type": "normal",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 5},
-            {"type": "special", "status": "freeze", "status_value": 1},
-            {"type": "attack", "value": 5}
-          ]
-        }
-      ],
-      "keywords": ["freeze"],
-      "rewards": {"gold": 18, "card_chance": 0.7, "relic_chance": 0.2}
-    },
-    {
-      "id": "star_lord",
-      "name_key": "enemy.star_lord",
-      "desc_key": "enemy.star_lord.desc",
-      "max_hp": 85,
-      "base_damage": 12,
-      "floor": 3,
-      "enemy_type": "boss",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 12},
-            {"type": "skill", "status": "weak", "status_value": 1},
-            {"type": "defend", "value": 15},
-            {"type": "attack", "value": 12}
-          ]
-        },
-        {
-          "phase": 2,
-          "condition": "hp_below_50",
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 20},
-            {"type": "special", "status": "freeze", "status_value": 1},
-            {"type": "attack", "value": 20}
-          ]
-        }
-      ],
-      "keywords": ["weak", "freeze"],
-      "rewards": {"gold": 60, "card_chance": 1.0, "relic_chance": 1.0}
-    }
+    {"id":"void_walker","name_key":"enemy.void_walker","desc_key":"enemy.void_walker.desc","max_hp":48,"base_damage":8,"floor":3,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":8},{"type":"skill","status":"weak","status_value":1},{"type":"attack","value":8},{"type":"defend","value":8}]}],
+      "keywords":["weak"],"rewards":{"gold":18,"card_chance":0.7,"relic_chance":0.2}},
+    {"id":"time_warp","name_key":"enemy.time_warp","desc_key":"enemy.time_warp.desc","max_hp":44,"base_damage":5,"floor":3,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":5},{"type":"special","status":"freeze","status_value":1},{"type":"attack","value":5}]}],
+      "keywords":["freeze"],"rewards":{"gold":18,"card_chance":0.7,"relic_chance":0.2}},
+    {"id":"astral_wisp","name_key":"enemy.astral_wisp","desc_key":"enemy.astral_wisp.desc","max_hp":40,"base_damage":6,"floor":3,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"skill","status":"dodge","status_value":2},{"type":"attack","value":6},{"type":"special","status":"freeze","status_value":1}]}],
+      "keywords":["dodge","freeze"],"rewards":{"gold":17,"card_chance":0.65,"relic_chance":0.2}},
+    {"id":"rift_reaver","name_key":"enemy.rift_reaver","desc_key":"enemy.rift_reaver.desc","max_hp":52,"base_damage":10,"floor":3,"enemy_type":"elite",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":10},{"type":"skill","status":"vulnerable","status_value":2},{"type":"attack","value":10}]},
+                   {"phase":2,"condition":"hp_below_50","pattern_type":"cycle","pattern":[{"type":"attack","value":16},{"type":"special","status":"freeze","status_value":1},{"type":"attack","value":16}]}],
+      "keywords":["vulnerable","freeze"],"rewards":{"gold":35,"card_chance":0.9,"relic_chance":0.35}},
+    {"id":"star_lord","name_key":"enemy.star_lord","desc_key":"enemy.star_lord.desc","max_hp":85,"base_damage":12,"floor":3,"enemy_type":"boss",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":12},{"type":"skill","status":"weak","status_value":1},{"type":"defend","value":15},{"type":"attack","value":12}]},
+                   {"phase":2,"condition":"hp_below_50","pattern_type":"cycle","pattern":[{"type":"attack","value":20},{"type":"special","status":"freeze","status_value":1},{"type":"attack","value":20}]}],
+      "keywords":["weak","freeze"],"rewards":{"gold":60,"card_chance":1.0,"relic_chance":1.0}}
   ]
 }

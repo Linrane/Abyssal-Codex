@@ -1,171 +1,218 @@
 {
   "cards": [
     {
-      "id": "blood_pact",
-      "name_key": "card.blood_pact",
-      "desc_key": "card.blood_pact.desc",
-      "card_type": "skill",
-      "rarity": "common",
-      "cost": 0,
-      "target": "self",
-      "effects": [
-        {"type": "damage", "value": 3},
-        {"type": "gain_energy", "value": 2}
-      ],
-      "upgraded": false,
+      "id": "blood_pact", "name_key": "card.blood_pact", "desc_key": "card.blood_pact.desc",
+      "card_type": "skill", "rarity": "common", "cost": 0, "target": "self",
+      "effects": [{"type": "damage_self", "value": 3}, {"type": "gain_energy", "value": 2}],
       "upgraded_cost": 0,
-      "upgraded_effects": [
-        {"type": "damage", "value": 2},
-        {"type": "gain_energy", "value": 2}
-      ],
-      "character_class": "blood",
-      "keywords": ["bloodrage"]
+      "upgraded_effects": [{"type": "damage_self", "value": 2}, {"type": "gain_energy", "value": 2}],
+      "character_class": "blood", "keywords": ["bloodrage"]
     },
     {
-      "id": "life_drain",
-      "name_key": "card.life_drain",
-      "desc_key": "card.life_drain.desc",
-      "card_type": "attack",
-      "rarity": "common",
-      "cost": 2,
-      "target": "single_enemy",
-      "effects": [
-        {"type": "damage", "value": 6},
-        {"type": "heal", "value": 6}
-      ],
-      "upgraded": false,
+      "id": "life_drain", "name_key": "card.life_drain", "desc_key": "card.life_drain.desc",
+      "card_type": "attack", "rarity": "common", "cost": 2, "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 6}, {"type": "heal", "value": 6}],
       "upgraded_cost": 2,
-      "upgraded_effects": [
-        {"type": "damage", "value": 9},
-        {"type": "heal", "value": 9}
-      ],
+      "upgraded_effects": [{"type": "damage", "value": 9}, {"type": "heal", "value": 9}],
       "character_class": "blood"
     },
     {
-      "id": "berserk",
-      "name_key": "card.berserk",
-      "desc_key": "card.berserk.desc",
-      "card_type": "power",
-      "rarity": "rare",
-      "cost": 1,
-      "target": "self",
-      "effects": [
-        {"type": "damage_self", "value": 5},
-        {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 3}
-      ],
-      "upgraded": false,
+      "id": "berserk", "name_key": "card.berserk", "desc_key": "card.berserk.desc",
+      "card_type": "power", "rarity": "rare", "cost": 1, "target": "self",
+      "effects": [{"type": "damage_self", "value": 5}, {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 3}],
       "upgraded_cost": 1,
-      "upgraded_effects": [
-        {"type": "damage_self", "value": 3},
-        {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 3}
-      ],
-      "character_class": "blood",
-      "keywords": ["bloodrage"]
+      "upgraded_effects": [{"type": "damage_self", "value": 3}, {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 3}],
+      "character_class": "blood", "keywords": ["bloodrage"]
     },
     {
-      "id": "charge_strike",
-      "name_key": "card.charge_strike",
-      "desc_key": "card.charge_strike.desc",
-      "card_type": "attack",
-      "rarity": "common",
-      "cost": 1,
-      "target": "single_enemy",
-      "effects": [
-        {"type": "damage", "value": 5},
-        {"type": "apply_status", "status": "charge", "duration": 999, "value": 2}
-      ],
-      "upgraded": false,
-      "upgraded_cost": 1,
-      "upgraded_effects": [
-        {"type": "damage", "value": 7},
-        {"type": "apply_status", "status": "charge", "duration": 999, "value": 3}
-      ],
-      "character_class": "sage",
-      "keywords": ["charge"]
-    },
-    {
-      "id": "thunder_clap",
-      "name_key": "card.thunder_clap",
-      "desc_key": "card.thunder_clap.desc",
-      "card_type": "attack",
-      "rarity": "rare",
-      "cost": 2,
-      "target": "all_enemies",
-      "effects": [
-        {"type": "damage", "value": 8},
-        {"type": "conditional_damage", "condition": "charge", "condition_value": 4, "value": 8}
-      ],
-      "upgraded": false,
-      "upgraded_cost": 2,
-      "upgraded_effects": [
-        {"type": "damage", "value": 10},
-        {"type": "conditional_damage", "condition": "charge", "condition_value": 4, "value": 10}
-      ],
-      "character_class": "sage",
-      "keywords": ["charge"]
-    },
-    {
-      "id": "counter_stance",
-      "name_key": "card.counter_stance",
-      "desc_key": "card.counter_stance.desc",
-      "card_type": "skill",
-      "rarity": "common",
-      "cost": 1,
-      "target": "self",
-      "effects": [
-        {"type": "set_stance", "status": "defense", "duration": 999, "value": 1},
-        {"type": "block", "value": 7}
-      ],
-      "upgraded": false,
-      "upgraded_cost": 1,
-      "upgraded_effects": [
-        {"type": "set_stance", "status": "defense", "duration": 999, "value": 1},
-        {"type": "block", "value": 10}
-      ],
-      "character_class": "swordmaster",
-      "keywords": ["stance"]
-    },
-    {
-      "id": "iaido_slash",
-      "name_key": "card.iaido_slash",
-      "desc_key": "card.iaido_slash.desc",
-      "card_type": "attack",
-      "rarity": "common",
-      "cost": 1,
-      "target": "single_enemy",
-      "effects": [
-        {"type": "set_stance", "status": "attack", "duration": 999, "value": 1},
-        {"type": "damage", "value": 8}
-      ],
-      "upgraded": false,
-      "upgraded_cost": 1,
-      "upgraded_effects": [
-        {"type": "set_stance", "status": "attack", "duration": 999, "value": 1},
-        {"type": "damage", "value": 12}
-      ],
-      "character_class": "swordmaster",
-      "keywords": ["stance"]
-    },
-    {
-      "id": "wind_stance",
-      "name_key": "card.wind_stance",
-      "desc_key": "card.wind_stance.desc",
-      "card_type": "skill",
-      "rarity": "common",
-      "cost": 1,
-      "target": "self",
-      "effects": [
-        {"type": "set_stance", "status": "gale", "duration": 999, "value": 1},
-        {"type": "draw", "value": 2}
-      ],
-      "upgraded": false,
+      "id": "blood_offering", "name_key": "card.blood_offering", "desc_key": "card.blood_offering.desc",
+      "card_type": "skill", "rarity": "rare", "cost": 0, "target": "self",
+      "effects": [{"type": "damage_self", "value": 6}, {"type": "draw", "value": 3}, {"type": "gain_energy", "value": 1}],
       "upgraded_cost": 0,
-      "upgraded_effects": [
-        {"type": "set_stance", "status": "gale", "duration": 999, "value": 1},
-        {"type": "draw", "value": 2}
-      ],
-      "character_class": "swordmaster",
-      "keywords": ["stance"]
+      "upgraded_effects": [{"type": "damage_self", "value": 4}, {"type": "draw", "value": 4}, {"type": "gain_energy", "value": 2}],
+      "character_class": "blood", "keywords": ["bloodrage"]
+    },
+    {
+      "id": "crimson_pact", "name_key": "card.crimson_pact", "desc_key": "card.crimson_pact.desc",
+      "card_type": "power", "rarity": "epic", "cost": 2, "target": "self",
+      "effects": [{"type": "damage_self", "value": 10}, {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 5},
+                  {"type": "apply_status", "status": "regen", "duration": 5, "value": 3}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage_self", "value": 8}, {"type": "apply_status", "status": "bloodrage", "duration": 999, "value": 5},
+                           {"type": "apply_status", "status": "regen", "duration": 5, "value": 5}],
+      "character_class": "blood", "keywords": ["bloodrage", "regen"]
+    },
+    {
+      "id": "hemorrhage", "name_key": "card.hemorrhage", "desc_key": "card.hemorrhage.desc",
+      "card_type": "attack", "rarity": "rare", "cost": 2, "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 5}, {"type": "apply_status", "status": "poison", "duration": 1, "value": 3}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage", "value": 7}, {"type": "apply_status", "status": "poison", "duration": 1, "value": 5}],
+      "character_class": "blood", "keywords": ["poison"]
+    },
+    {
+      "id": "blood_shield", "name_key": "card.blood_shield", "desc_key": "card.blood_shield.desc",
+      "card_type": "skill", "rarity": "common", "cost": 1, "target": "self",
+      "effects": [{"type": "damage_self", "value": 3}, {"type": "block", "value": 12}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "damage_self", "value": 3}, {"type": "block", "value": 16}],
+      "character_class": "blood"
+    },
+    {
+      "id": "charge_strike", "name_key": "card.charge_strike", "desc_key": "card.charge_strike.desc",
+      "card_type": "attack", "rarity": "common", "cost": 1, "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 5}, {"type": "apply_status", "status": "charge", "duration": 999, "value": 2}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "damage", "value": 7}, {"type": "apply_status", "status": "charge", "duration": 999, "value": 3}],
+      "character_class": "sage", "keywords": ["charge"]
+    },
+    {
+      "id": "thunder_clap", "name_key": "card.thunder_clap", "desc_key": "card.thunder_clap.desc",
+      "card_type": "attack", "rarity": "rare", "cost": 2, "target": "all_enemies",
+      "effects": [{"type": "damage", "value": 8}, {"type": "conditional_damage", "condition": "charge", "condition_value": 4, "value": 8}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage", "value": 10}, {"type": "conditional_damage", "condition": "charge", "condition_value": 4, "value": 10}],
+      "character_class": "sage", "keywords": ["charge"]
+    },
+    {
+      "id": "arcane_surge", "name_key": "card.arcane_surge", "desc_key": "card.arcane_surge.desc",
+      "card_type": "skill", "rarity": "common", "cost": 1, "target": "self",
+      "effects": [{"type": "apply_status", "status": "charge", "duration": 999, "value": 3}, {"type": "draw", "value": 1}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "apply_status", "status": "charge", "duration": 999, "value": 4}, {"type": "draw", "value": 2}],
+      "character_class": "sage", "keywords": ["charge"]
+    },
+    {
+      "id": "rune_wall", "name_key": "card.rune_wall", "desc_key": "card.rune_wall.desc",
+      "card_type": "skill", "rarity": "common", "cost": 1, "target": "self",
+      "effects": [{"type": "block", "value": 5}, {"type": "apply_status", "status": "charge", "duration": 999, "value": 2}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "block", "value": 8}, {"type": "apply_status", "status": "charge", "duration": 999, "value": 3}],
+      "character_class": "sage", "keywords": ["charge"]
+    },
+    {
+      "id": "resonance_blast", "name_key": "card.resonance_blast", "desc_key": "card.resonance_blast.desc",
+      "card_type": "attack", "rarity": "epic", "cost": 3, "target": "all_enemies",
+      "effects": [{"type": "damage", "value": 6}, {"type": "conditional_damage", "condition": "charge", "condition_value": 6, "value": 14},
+                  {"type": "apply_status", "status": "resonance", "duration": 2, "value": 2}],
+      "upgraded_cost": 3,
+      "upgraded_effects": [{"type": "damage", "value": 8}, {"type": "conditional_damage", "condition": "charge", "condition_value": 6, "value": 18},
+                           {"type": "apply_status", "status": "resonance", "duration": 3, "value": 3}],
+      "character_class": "sage", "keywords": ["charge", "resonance"]
+    },
+    {
+      "id": "elemental_fury", "name_key": "card.elemental_fury", "desc_key": "card.elemental_fury.desc",
+      "card_type": "power", "rarity": "rare", "cost": 2, "target": "self",
+      "effects": [{"type": "apply_status", "status": "charge", "duration": 999, "value": 10}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "apply_status", "status": "charge", "duration": 999, "value": 12}],
+      "character_class": "sage", "keywords": ["charge"], "exhaust": true
+    },
+    {
+      "id": "counter_stance", "name_key": "card.counter_stance", "desc_key": "card.counter_stance.desc",
+      "card_type": "skill", "rarity": "common", "cost": 1, "target": "self",
+      "effects": [{"type": "set_stance", "status": "defense", "duration": 999, "value": 1}, {"type": "block", "value": 7}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "set_stance", "status": "defense", "duration": 999, "value": 1}, {"type": "block", "value": 10}],
+      "character_class": "swordmaster", "keywords": ["stance"]
+    },
+    {
+      "id": "iaido_slash", "name_key": "card.iaido_slash", "desc_key": "card.iaido_slash.desc",
+      "card_type": "attack", "rarity": "common", "cost": 1, "target": "single_enemy",
+      "effects": [{"type": "set_stance", "status": "attack", "duration": 999, "value": 1}, {"type": "damage", "value": 8}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "set_stance", "status": "attack", "duration": 999, "value": 1}, {"type": "damage", "value": 12}],
+      "character_class": "swordmaster", "keywords": ["stance"]
+    },
+    {
+      "id": "wind_stance", "name_key": "card.wind_stance", "desc_key": "card.wind_stance.desc",
+      "card_type": "skill", "rarity": "common", "cost": 1, "target": "self",
+      "effects": [{"type": "set_stance", "status": "gale", "duration": 999, "value": 1}, {"type": "draw", "value": 2}],
+      "upgraded_cost": 0,
+      "upgraded_effects": [{"type": "set_stance", "status": "gale", "duration": 999, "value": 1}, {"type": "draw", "value": 2}],
+      "character_class": "swordmaster", "keywords": ["stance"]
+    },
+    {
+      "id": "shadowless_cut", "name_key": "card.shadowless_cut", "desc_key": "card.shadowless_cut.desc",
+      "card_type": "attack", "rarity": "rare", "cost": 2, "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 12}, {"type": "apply_status", "status": "dodge", "duration": 1, "value": 1}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage", "value": 16}, {"type": "apply_status", "status": "dodge", "duration": 1, "value": 2}],
+      "character_class": "swordmaster", "keywords": ["stance", "dodge"]
+    },
+    {
+      "id": "flow_state", "name_key": "card.flow_state", "desc_key": "card.flow_state.desc",
+      "card_type": "power", "rarity": "rare", "cost": 1, "target": "self",
+      "effects": [{"type": "draw", "value": 2}, {"type": "gain_energy", "value": 1}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "draw", "value": 3}, {"type": "gain_energy", "value": 2}],
+      "character_class": "swordmaster", "keywords": ["stance"]
+    },
+    {
+      "id": "dragon_strike", "name_key": "card.dragon_strike", "desc_key": "card.dragon_strike.desc",
+      "card_type": "attack", "rarity": "epic", "cost": 3, "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 20}, {"type": "apply_status", "status": "vulnerable", "duration": 2, "value": 2}],
+      "upgraded_cost": 3,
+      "upgraded_effects": [{"type": "damage", "value": 28}, {"type": "apply_status", "status": "vulnerable", "duration": 3, "value": 2}],
+      "character_class": "swordmaster", "keywords": ["stance", "vulnerable"]
+    },
+    {
+      "id": "shield_wall", "name_key": "card.shield_wall", "desc_key": "card.shield_wall.desc",
+      "card_type": "skill", "rarity": "rare", "cost": 2, "target": "self",
+      "effects": [{"type": "block", "value": 12}, {"type": "apply_status", "status": "metallic", "duration": 2, "value": 4}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "block", "value": 15}, {"type": "apply_status", "status": "metallic", "duration": 3, "value": 5}],
+      "character_class": "knight", "keywords": ["metallic"]
+    },
+    {
+      "id": "crusader_strike", "name_key": "card.crusader_strike", "desc_key": "card.crusader_strike.desc",
+      "card_type": "attack", "rarity": "rare", "cost": 2, "target": "single_enemy",
+      "effects": [{"type": "damage", "value": 10}, {"type": "block", "value": 5}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage", "value": 14}, {"type": "block", "value": 7}],
+      "character_class": "knight"
+    },
+    {
+      "id": "holy_nova", "name_key": "card.holy_nova", "desc_key": "card.holy_nova.desc",
+      "card_type": "attack", "rarity": "epic", "cost": 2, "target": "all_enemies",
+      "effects": [{"type": "damage", "value": 9}, {"type": "apply_status", "status": "vulnerable", "duration": 2, "value": 2}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "damage", "value": 13}, {"type": "apply_status", "status": "vulnerable", "duration": 3, "value": 2}],
+      "character_class": "knight", "keywords": ["vulnerable"]
+    },
+    {
+      "id": "poison_dart", "name_key": "card.poison_dart", "desc_key": "card.poison_dart.desc",
+      "card_type": "attack", "rarity": "common", "cost": 0, "target": "single_enemy",
+      "effects": [{"type": "apply_status", "status": "poison", "duration": 1, "value": 3}],
+      "upgraded_cost": 0,
+      "upgraded_effects": [{"type": "apply_status", "status": "poison", "duration": 1, "value": 5}],
+      "character_class": "weaver", "keywords": ["poison"], "exhaust": true
+    },
+    {
+      "id": "toxic_shroud", "name_key": "card.toxic_shroud", "desc_key": "card.toxic_shroud.desc",
+      "card_type": "skill", "rarity": "rare", "cost": 1, "target": "self",
+      "effects": [{"type": "block", "value": 5}, {"type": "apply_status", "status": "poison", "duration": 1, "value": 4}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "block", "value": 7}, {"type": "apply_status", "status": "poison", "duration": 1, "value": 6}],
+      "character_class": "weaver", "keywords": ["poison"]
+    },
+    {
+      "id": "shadow_clone", "name_key": "card.shadow_clone", "desc_key": "card.shadow_clone.desc",
+      "card_type": "power", "rarity": "epic", "cost": 2, "target": "self",
+      "effects": [{"type": "apply_status", "status": "dodge", "duration": 2, "value": 2},
+                  {"type": "apply_status", "status": "thorns", "duration": 3, "value": 4}],
+      "upgraded_cost": 2,
+      "upgraded_effects": [{"type": "apply_status", "status": "dodge", "duration": 3, "value": 2},
+                           {"type": "apply_status", "status": "thorns", "duration": 3, "value": 6}],
+      "character_class": "weaver", "keywords": ["dodge", "thorns"]
+    },
+    {
+      "id": "blade_dance", "name_key": "card.blade_dance", "desc_key": "card.blade_dance.desc",
+      "card_type": "attack", "rarity": "epic", "cost": 1, "target": "single_enemy",
+      "effects": [{"type": "multi_hit", "value": 4, "secondary_value": 4}],
+      "upgraded_cost": 1,
+      "upgraded_effects": [{"type": "multi_hit", "value": 5, "secondary_value": 5}],
+      "character_class": "weaver"
     }
   ]
 }

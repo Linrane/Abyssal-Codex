@@ -34,6 +34,9 @@ class StatusType:
     FREEZE = "freeze"
     RESONANCE = "resonance"
     BLOODRAGE = "bloodrage"
+    STRENGTH = "strength"
+    METALLIC = "metallic"
+    INTANGIBLE = "intangible"
     STANCE_ATTACK = "attack"
     STANCE_DEFENSE = "defense"
     STANCE_GALE = "gale"
@@ -42,6 +45,7 @@ class StatusType:
     STATUS_LIST = [
         VULNERABLE, WEAK, POISON, CHARGE, DODGE,
         REGEN, THORNS, FREEZE, RESONANCE, BLOODRAGE,
+        STRENGTH, METALLIC, INTANGIBLE,
     ]
 
 
@@ -106,9 +110,17 @@ class Combatant:
             bloodrage_bonus = 1.0 + (1.0 - hp_percent) * 0.5 * attacker.get_status_stacks(StatusType.BLOODRAGE)
             amount = int(amount * bloodrage_bonus)
 
+        # Apply strength bonus from attacker
+        if attacker and attacker.has_status(StatusType.STRENGTH):
+            amount += attacker.get_status_stacks(StatusType.STRENGTH)
+
         # Apply stance attack bonus
         if attacker and attacker.has_status(StatusType.STANCE_ATTACK):
             amount = int(amount * 1.2)
+
+        # Intangible: all damage taken is reduced to 1
+        if self.has_status(StatusType.INTANGIBLE) and amount > 1:
+            amount = 1
 
         # Reduce block first
         if self.block > 0:
@@ -160,6 +172,9 @@ class Combatant:
                 status.stacks = max(0, status.stacks - 1)
                 if status.stacks <= 0:
                     expired.append(name)
+
+            elif name == StatusType.METALLIC and status.stacks > 0:
+                self.add_block(status.stacks)
 
             elif status.duration > 0:
                 status.duration -= 1

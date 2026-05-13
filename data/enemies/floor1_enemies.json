@@ -1,88 +1,22 @@
 {
   "enemies": [
-    {
-      "id": "fallen_paladin",
-      "name_key": "enemy.fallen_paladin",
-      "desc_key": "enemy.fallen_paladin.desc",
-      "max_hp": 35,
-      "base_damage": 7,
-      "floor": 1,
-      "enemy_type": "normal",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 7},
-            {"type": "attack", "value": 7},
-            {"type": "defend", "value": 6}
-          ]
-        },
-        {
-          "phase": 2,
-          "condition": "hp_below_50",
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 10},
-            {"type": "attack", "value": 10},
-            {"type": "skill", "status": "vulnerable", "status_value": 1}
-          ]
-        }
-      ],
-      "rewards": {"gold": 12, "card_chance": 0.5, "relic_chance": 0.1}
-    },
-    {
-      "id": "gargoyle",
-      "name_key": "enemy.gargoyle",
-      "desc_key": "enemy.gargoyle.desc",
-      "max_hp": 28,
-      "base_damage": 5,
-      "floor": 1,
-      "enemy_type": "normal",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "defend", "value": 8},
-            {"type": "attack", "value": 5},
-            {"type": "attack", "value": 5}
-          ]
-        }
-      ],
-      "rewards": {"gold": 10, "card_chance": 0.5, "relic_chance": 0.1}
-    },
-    {
-      "id": "sanctum_guardian",
-      "name_key": "enemy.sanctum_guardian",
-      "desc_key": "enemy.sanctum_guardian.desc",
-      "max_hp": 60,
-      "base_damage": 8,
-      "floor": 1,
-      "enemy_type": "boss",
-      "behaviors": [
-        {
-          "phase": 1,
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 8},
-            {"type": "defend", "value": 10},
-            {"type": "attack", "value": 8},
-            {"type": "skill", "status": "vulnerable", "status_value": 2}
-          ]
-        },
-        {
-          "phase": 2,
-          "condition": "hp_below_50",
-          "pattern_type": "cycle",
-          "pattern": [
-            {"type": "attack", "value": 14},
-            {"type": "attack", "value": 14},
-            {"type": "special", "status": "weak", "status_value": 1}
-          ]
-        }
-      ],
-      "rewards": {"gold": 40, "card_chance": 1.0, "relic_chance": 1.0}
-    }
+    {"id":"fallen_paladin","name_key":"enemy.fallen_paladin","desc_key":"enemy.fallen_paladin.desc","max_hp":35,"base_damage":7,"floor":1,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":7},{"type":"attack","value":7},{"type":"defend","value":6}]},
+                   {"phase":2,"condition":"hp_below_50","pattern_type":"cycle","pattern":[{"type":"attack","value":10},{"type":"attack","value":10},{"type":"skill","status":"vulnerable","status_value":1}]}],
+      "rewards":{"gold":12,"card_chance":0.5,"relic_chance":0.1}},
+    {"id":"gargoyle","name_key":"enemy.gargoyle","desc_key":"enemy.gargoyle.desc","max_hp":28,"base_damage":5,"floor":1,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"defend","value":8},{"type":"attack","value":5},{"type":"attack","value":5}]}],
+      "rewards":{"gold":10,"card_chance":0.5,"relic_chance":0.1}},
+    {"id":"fallen_cleric","name_key":"enemy.fallen_cleric","desc_key":"enemy.fallen_cleric.desc","max_hp":25,"base_damage":4,"floor":1,"enemy_type":"normal",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"skill","status":"regen","status_value":3},{"type":"attack","value":4},{"type":"defend","value":5}]}],
+      "keywords":["regen"],"rewards":{"gold":12,"card_chance":0.55,"relic_chance":0.12}},
+    {"id":"stone_sentinel","name_key":"enemy.stone_sentinel","desc_key":"enemy.stone_sentinel.desc","max_hp":40,"base_damage":4,"floor":1,"enemy_type":"elite",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"defend","value":14},{"type":"attack","value":4},{"type":"attack","value":4}]},
+                   {"phase":2,"condition":"hp_below_50","pattern_type":"cycle","pattern":[{"type":"attack","value":10},{"type":"defend","value":10},{"type":"attack","value":10}]}],
+      "rewards":{"gold":25,"card_chance":0.8,"relic_chance":0.3}},
+    {"id":"sanctum_guardian","name_key":"enemy.sanctum_guardian","desc_key":"enemy.sanctum_guardian.desc","max_hp":60,"base_damage":8,"floor":1,"enemy_type":"boss",
+      "behaviors":[{"phase":1,"pattern_type":"cycle","pattern":[{"type":"attack","value":8},{"type":"defend","value":10},{"type":"attack","value":8},{"type":"skill","status":"vulnerable","status_value":2}]},
+                   {"phase":2,"condition":"hp_below_50","pattern_type":"cycle","pattern":[{"type":"attack","value":14},{"type":"attack","value":14},{"type":"special","status":"weak","status_value":1}]}],
+      "rewards":{"gold":40,"card_chance":1.0,"relic_chance":1.0}}
   ]
 }

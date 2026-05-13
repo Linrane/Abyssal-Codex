@@ -1,29 +1,17 @@
 {
   "relics": [
-    {
-      "id": "void_prism",
-      "name_key": "relic.void_prism",
-      "desc_key": "relic.void_prism.desc",
-      "tier": "boss",
-      "passive": {"max_energy": 1},
-      "on_turn_end": {"effect": "top_discard_to_curse"}
-    },
-    {
-      "id": "phoenix_feather",
-      "name_key": "relic.phoenix_feather",
-      "desc_key": "relic.phoenix_feather.desc",
-      "tier": "legendary",
-      "on_death": {"effect": "revive", "value": 0.5},
-      "charges": 1,
-      "max_charges": 1
-    },
-    {
-      "id": "shackled_soul",
-      "name_key": "relic.shackled_soul",
-      "desc_key": "relic.shackled_soul.desc",
-      "tier": "common",
-      "on_combat_start": {"effect": "gain_energy", "value": 1},
-      "passive": {"max_hp": -5}
-    }
+    {"id":"void_prism","name_key":"relic.void_prism","desc_key":"relic.void_prism.desc","tier":"boss","passive":{"max_energy":1},"on_turn_end":{"effect":"top_discard_to_curse"}},
+    {"id":"phoenix_feather","name_key":"relic.phoenix_feather","desc_key":"relic.phoenix_feather.desc","tier":"legendary","on_death":{"effect":"revive","value":0.5},"charges":1,"max_charges":1},
+    {"id":"shackled_soul","name_key":"relic.shackled_soul","desc_key":"relic.shackled_soul.desc","tier":"common","on_combat_start":{"effect":"gain_energy","value":1},"passive":{"max_hp":-5}},
+    {"id":"cursed_crown","name_key":"relic.cursed_crown","desc_key":"relic.cursed_crown.desc","tier":"boss","passive":{"max_energy":1},"on_combat_start":{"effect":"add_curse","card_id":"doubt"}},
+    {"id":"astrolabe","name_key":"relic.astrolabe","desc_key":"relic.astrolabe.desc","tier":"boss","charges":3,"max_charges":3},
+    {"id":"soul_vessel","name_key":"relic.soul_vessel","desc_key":"relic.soul_vessel.desc","tier":"legendary","on_kill":{"effect":"heal","value":8}},
+    {"id":"frozen_core","name_key":"relic.frozen_core","desc_key":"relic.frozen_core.desc","tier":"boss","on_combat_start":{"effect":"apply_random_enemy","status":"freeze","value":1}},
+    {"id":"black_blood","name_key":"relic.black_blood","desc_key":"relic.black_blood.desc","tier":"legendary","on_turn_end":{"effect":"heal","value":3}},
+    {"id":"mirror_shard","name_key":"relic.mirror_shard","desc_key":"relic.mirror_shard.desc","tier":"boss","passive":{"duplicate_first_card":true}},
+    {"id":"abyssal_mark","name_key":"relic.abyssal_mark","desc_key":"relic.abyssal_mark.desc","tier":"curse","on_turn_end":{"effect":"damage_self","value":2},"passive":{"draw_bonus":1}},
+    {"id":"golden_idol","name_key":"relic.golden_idol","desc_key":"relic.golden_idol.desc","tier":"common","passive":{"gold_bonus":0.25}},
+    {"id":"tome_of_echoes","name_key":"relic.tome_of_echoes","desc_key":"relic.tome_of_echoes.desc","tier":"common","on_card_played":{"effect":"chance_double_play","value":0.1}},
+    {"id":"thorn_crown","name_key":"relic.thorn_crown","desc_key":"relic.thorn_crown.desc","tier":"boss","on_damage_taken":{"effect":"apply_thorns","value":2}}
   ]
 }
