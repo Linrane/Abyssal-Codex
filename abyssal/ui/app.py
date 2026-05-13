@@ -562,6 +562,7 @@ class GameApp:
 
     def _show_map(self) -> None:
         self.current_screen = "map"
+        selected_avail_idx = 0  # Which available node is highlighted
 
         while self.running and self.engine.state and self.engine.state.phase in (RunPhase.MAP, RunPhase.COMBAT, RunPhase.EVENT, RunPhase.SHOP, RunPhase.REST):
             self.console.clear()
@@ -596,6 +597,10 @@ class GameApp:
 
             # Node graph — framework Section 7.2, 12
             available = set(self.engine.get_available_nodes())
+            avail_list = sorted(available)
+            # Clamp selected index
+            if avail_list:
+                selected_avail_idx = max(0, min(selected_avail_idx, len(avail_list) - 1))
             current_node_id = fm.current_node
             nodes = fm.nodes
 
@@ -629,8 +634,17 @@ class GameApp:
                         marker = "✓"
                         node_style = COLOR_DIM
                     elif node.id in available:
-                        marker = "→"
-                        node_style = COLOR_NODE.get(node.room_type, COLOR_BRIGHT)
+                        # Highlight only the selected available node
+                        try:
+                            is_selected = avail_list[selected_avail_idx] == node.id
+                        except IndexError:
+                            is_selected = False
+                        if is_selected:
+                            marker = "▶"
+                            node_style = COLOR_HIGHLIGHT
+                        else:
+                            marker = " "
+                            node_style = COLOR_NODE.get(node.room_type, COLOR_BRIGHT)
                     else:
                         marker = " "
                         node_style = COLOR_DIM
@@ -646,9 +660,22 @@ class GameApp:
 
             self.console.print("")
 
+            # Selection hint
+            if len(avail_list) > 1:
+                selected_node_id = avail_list[selected_avail_idx]
+                selected_node = fm.nodes.get(selected_node_id)
+                if selected_node:
+                    sel_label = node_labels.get(selected_node.room_type, "?")
+                    hint = Text(
+                        f"▶ {t('map.selected', self.lang)}: {sel_label}  ←→ {t('map.switch_node', self.lang)}  Enter {t('map.confirm_move', self.lang)}",
+                        style=COLOR_BRIGHT,
+                    )
+                    self.console.print(Align.center(hint))
+                    self.console.print("")
+
             # Controls
             controls = Text(
-                f"↑↓←→ Enter {t('map.navigate', self.lang)} | D {t('deck.title', self.lang)} | ESC {t('menu.back', self.lang)}",
+                f"←→ {t('map.switch_node', self.lang)} | Enter {t('map.confirm_move', self.lang)} | D {t('deck.title', self.lang)} | ESC {t('menu.back', self.lang)}",
                 style=COLOR_DIM,
             )
             self.console.print(Align.center(controls))
@@ -658,13 +685,15 @@ class GameApp:
                 break
             elif key in ('d',):
                 self._show_deck_view()
-            elif key in ('up', 'down', 'left', 'right', 'enter'):
-                avail = sorted(available)
-                if avail:
-                    node_id = avail[0]
+            elif key in ('left', 'right'):
+                if avail_list:
+                    delta = 1 if key == 'right' else -1
+                    selected_avail_idx = (selected_avail_idx + delta) % len(avail_list)
+            elif key in ('enter',):
+                if avail_list:
+                    node_id = avail_list[selected_avail_idx]
                     self.engine.move_to_node(node_id)
                     node = fm.nodes[node_id]
-                    self.engine.state.phase = RunPhase.MAP  # Ensure phase is correct
 
                     if node.room_type in (RoomType.COMBAT, RoomType.ELITE, RoomType.BOSS):
                         self._show_combat()
@@ -674,6 +703,52 @@ class GameApp:
                         self._show_shop()
                     elif node.room_type == RoomType.REST:
                         self._show_rest()
+
+    def _show_floor_transition(self, floor_cleared: int) -> None:
+        """Narrative transition screen between floors."""
+        self.console.clear()
+
+        # Victory banner
+        lines = []
+        lines.append("")
+        lines.append(r"  ╔══════════════════════════════════════╗")
+        lines.append(rf"  ║  {t('floor.cleared', self.lang):<36s} ║")
+        lines.append(r"  ╚══════════════════════════════════════╝")
+        lines.append("")
+
+        for line in lines:
+            self.console.print(Align.center(line, style=COLOR_HIGHLIGHT))
+
+        # Floor narrative
+        floor_name = t(f"floor.{floor_cleared}.name", self.lang)
+        self.console.print("")
+        self.console.print(Align.center(Text(f"{t('floor.boss_defeated', self.lang)} — {floor_name}", style=COLOR_BRIGHT)))
+        self.console.print("")
+
+        # Transition message
+        next_floor = floor_cleared + 1
+        if next_floor <= 3:
+            next_name = t(f"floor.{next_floor}.name", self.lang)
+            next_desc = t(f"floor.{next_floor}.desc", self.lang)
+            transition_text = Text()
+            transition_text.append(f"\n{t('floor.transition', self.lang)}\n\n", style=COLOR_DIM)
+            transition_text.append(f"{t('floor.enter_next', self.lang)}: ", style=COLOR_BRIGHT)
+            transition_text.append(next_name, style=COLOR_HIGHLIGHT)
+            transition_text.append("\n")
+            transition_text.append(next_desc, style=COLOR_DIM)
+
+            if next_floor == 3:
+                transition_text.append(f"\n\n{t('floor.final_floor', self.lang)}", style=COLOR_HIGHLIGHT)
+                transition_text.append(f"\n{t('floor.no_return', self.lang)}", style=COLOR_DIM)
+
+            self.console.print(Align.center(transition_text))
+        else:
+            self.console.print(Align.center(Text(t('floor.final_floor', self.lang), style=COLOR_HIGHLIGHT)))
+
+        self.console.print("")
+        self.console.print(Align.center(Text(t("misc.press_any", self.lang), style=COLOR_DIM)))
+
+        self.key_handler.get_key()
 
     # ── Combat Screen ────────────────────────────────────────────────
     # Framework Section 6, 11, 12 — THE core screen
@@ -878,6 +953,7 @@ class GameApp:
                     return
                 else:
                     self.engine.state.phase = RunPhase.MAP
+                    self._show_floor_transition(state.current_floor - 1)
                     self._show_map()
                     return
             self.engine.state.phase = RunPhase.MAP

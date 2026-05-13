@@ -176,6 +176,12 @@ ZH = {
     "floor.3.name": "星核裂隙",
     "floor.3.desc": "虚空浮岛悬浮于星海，时空在此扭曲。",
     "floor.3.effect": "能量回复+1，但卡牌费用随机波动±1",
+    "floor.cleared": "深渊层通关！",
+    "floor.boss_defeated": "守关者已被击败！",
+    "floor.transition": "继续深入深渊...",
+    "floor.enter_next": "进入下一层",
+    "floor.final_floor": "最终层 — 星核裂隙",
+    "floor.no_return": "前方已无退路...",
 
     # === Misc ===
     "misc.press_any": "按任意键继续...",
@@ -630,6 +636,9 @@ ZH = {
     "map.you_are_here": "你在这里",
     "map.available": "可前往",
     "map.visited": "已探索",
+    "map.selected": "当前选择",
+    "map.switch_node": "切换节点",
+    "map.confirm_move": "确认移动",
     "combat.controls": "[1-9] 出牌 | [E] 结束回合 | [D] 牌组 | [R] 重抽(需蛇皮) | [Tab] 切换目标",
     "combat.no_energy": "能量不足",
     "combat.card_playable": "可打出",

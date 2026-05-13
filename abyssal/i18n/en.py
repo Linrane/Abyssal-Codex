@@ -176,6 +176,12 @@ EN = {
     "floor.3.name": "Star Core Rift",
     "floor.3.desc": "Void islets float among star seas, time and space warp.",
     "floor.3.effect": "+1 Energy/turn, but card costs fluctuate ±1",
+    "floor.cleared": "Floor Cleared!",
+    "floor.boss_defeated": "Boss Defeated!",
+    "floor.transition": "Descending deeper into the Abyss...",
+    "floor.enter_next": "Enter the next floor",
+    "floor.final_floor": "Final Floor — Star Core Rift",
+    "floor.no_return": "There is no turning back...",
 
     # === Misc ===
     "misc.press_any": "Press any key to continue...",
@@ -630,6 +636,9 @@ EN = {
     "map.you_are_here": "You are here",
     "map.available": "Available",
     "map.visited": "Visited",
+    "map.selected": "Selected",
+    "map.switch_node": "Switch node",
+    "map.confirm_move": "Confirm",
     "combat.controls": "[1-9] Play Card  [E] End Turn  [D] Deck  [R] Redraw (Snake Skin)  [Tab] Switch Target",
     "combat.no_energy": "Insufficient energy",
     "combat.card_playable": "Playable",

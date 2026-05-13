@@ -149,7 +149,7 @@ class GameEngine:
         return state
 
     def _generate_floor(self, floor_id: int) -> None:
-        """Generate a floor map."""
+        """Generate a floor map with guaranteed diverse node types."""
         floor_data = None
         for f in self._floors_data.get("floors", []):
             if f["id"] == floor_id:
@@ -165,49 +165,53 @@ class GameEngine:
         )
         num_rooms = min(num_rooms, 8)
 
-        # Generate nodes
         nodes = {}
-        # Row 0: Start
-        nodes["start"] = MapNode(id="start", room_type=RoomType.START, row=0, col=2, available=True, visited=True)
-        # Row 1: Combat + optional Event/Shop
-        nodes["c1"] = MapNode(id="c1", room_type=RoomType.COMBAT, row=1, col=1, available=True)
-        nodes["e1"] = MapNode(id="e1", room_type=RoomType.EVENT, row=1, col=3, available=True)
-        nodes["start"].connected_to = ["c1", "e1"]
 
-        # Middle rows
-        prev_combat = "c1"
-        for i in range(2, num_rooms):
-            cid = f"c{i}"
-            nodes[cid] = MapNode(id=cid, room_type=RoomType.COMBAT, row=i, col=2, available=(i <= 2))
-            if prev_combat:
-                nodes[prev_combat].connected_to.append(cid)
-            # Side branch
-            if random.random() < 0.4:
-                eid = f"e{i}"
-                nodes[eid] = MapNode(id=eid, room_type=random.choice([RoomType.EVENT, RoomType.SHOP]), row=i, col=0, available=True)
-                if prev_combat:
-                    nodes[prev_combat].connected_to.append(eid)
-                nodes[eid].connected_to.append(cid)
-            elif random.random() < 0.3:
-                rid = f"r{i}"
-                nodes[rid] = MapNode(id=rid, room_type=RoomType.REST, row=i, col=4, available=True)
-                if prev_combat:
-                    nodes[prev_combat].connected_to.append(rid)
-                nodes[rid].connected_to.append(cid)
-            prev_combat = cid
+        # Row 0: Start node
+        nodes["start"] = MapNode(id="start", room_type=RoomType.START, row=0, col=2,
+                                  available=True, visited=True)
+
+        # Plan rows 1..num_rooms-1 (boss at num_rooms)
+        # Guarantee: 1 event, 1 shop, 1 rest across the floor
+        side_types = [RoomType.EVENT, RoomType.SHOP, RoomType.REST]
+        random.shuffle(side_types)
+
+        prev_nodes = ["start"]  # nodes from previous row that connect forward
+        side_idx = 0
+
+        for row in range(1, num_rooms):
+            # Always place a combat node at this row
+            cid = f"c{row}"
+            nodes[cid] = MapNode(id=cid, room_type=RoomType.COMBAT, row=row,
+                                  col=2, available=True)
+
+            # Connect all previous nodes to this combat
+            for pn in prev_nodes:
+                if cid not in nodes[pn].connected_to:
+                    nodes[pn].connected_to.append(cid)
+
+            # Place a side node at this row
+            new_prev = [cid]
+            if side_idx < len(side_types):
+                stype = side_types[side_idx]
+                sid = f"s{row}"
+                nodes[sid] = MapNode(id=sid, room_type=stype, row=row,
+                                      col=4, available=True)
+                for pn in prev_nodes:
+                    if sid not in nodes[pn].connected_to:
+                        nodes[pn].connected_to.append(sid)
+                # Side node also connects forward to combat
+                nodes[sid].connected_to.append(cid)
+                new_prev.append(sid)
+                side_idx += 1
+
+            prev_nodes = new_prev
 
         # Boss row
-        nodes["boss"] = MapNode(id="boss", room_type=RoomType.BOSS, row=num_rooms, col=2, available=False)
-        if prev_combat:
-            nodes[prev_combat].connected_to.append("boss")
-
-        # Connect events to combat nodes
-        for nid, node in nodes.items():
-            if node.room_type in (RoomType.EVENT, RoomType.SHOP, RoomType.REST):
-                # Find the combat at the same row
-                row_combat = f"c{node.row}"
-                if row_combat in nodes and row_combat not in node.connected_to:
-                    node.connected_to.append(row_combat)
+        nodes["boss"] = MapNode(id="boss", room_type=RoomType.BOSS, row=num_rooms,
+                                 col=2, available=False)
+        for pn in prev_nodes:
+            nodes[pn].connected_to.append("boss")
 
         floor_map = FloorMap(
             floor_id=floor_id,
