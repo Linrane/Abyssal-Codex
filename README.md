@@ -1,163 +1,173 @@
-# 🃏 Abyssal Codex / 深渊牌匣
+<p align="center">
+  <br>
+  <samp>
+    ╔══════════════════════════════════════════════════╗<br>
+    ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9608;&nbsp;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9600;<br>
+    ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9600;&#9600;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+    ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&#9608;&#9600;&#9600;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9600;&#9608;&nbsp;&#9608;&#9600;&nbsp;&#9608;&#9600;&#9600;&#9608;&nbsp;&nbsp;&#9608;&#9600;&#9600;&#9600;<br>
+    ╚══════════════════════════════════════════════════╝
+  </samp>
+</p>
 
-> Terminal Roguelike Card Game · 终端肉鸽卡牌游戏
+<p align="center">
+  <strong>—— 终端肉鸽卡牌冒险 · Terminal Roguelike Deckbuilder ——</strong>
+</p>
 
-[English](#english) | [中文](#中文)
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.2.0-8b5cf6?style=flat-square" alt="version">
+  <img src="https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square" alt="python">
+  <img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square" alt="license">
+  <img src="https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square" alt="tests">
+  <img src="https://img.shields.io/badge/i18n-中文_|_English-f59e0b?style=flat-square" alt="i18n">
+</p>
+
+<br>
 
 ---
 
-## English
+<p align="center">
+  <a href="https://github.com/Linrane/Abyssal-Codex/wiki">📖 Wiki 维基</a> &nbsp;·&nbsp;
+  <a href="#-quick-start--快速开始">🚀 Quick Start</a> &nbsp;·&nbsp;
+  <a href="#-features--游戏特色">✨ Features</a> &nbsp;·&nbsp;
+  <a href="#-controls--操作指南">🎮 Controls</a> &nbsp;·&nbsp;
+  <a href="#-heroes--英雄">🦸 Heroes</a> &nbsp;·&nbsp;
+  <a href="#-story--剧情">📜 Story</a>
+</p>
 
-**Abyssal Codex** is a roguelike deck-building game that runs entirely in your terminal. ASCII art visuals, deep strategy, and procedural generation combine for a unique adventure each run.
+---
 
-### Features
+## 🃏 About / 关于
 
-- **Terminal ASCII Art** — All scenes rendered with character graphics, colors, and layouts
-- **4 Hero Classes** — Abyssal Knight, Shadow Weaver, Rune Sage, Bloodbinder (2 unlocked initially)
-- **27+ Cards** — Attack, Skill, Power, Curse, and Legendary cards with upgrade system
-- **9 Enemy Types** — Normal, Elite, and Boss enemies across 3 floors
-- **10+ Relics** — Permanent passive items that shape your build
-- **Keyword System** — 25+ status effects with chain reactions (Vulnerable, Poison, Charge, Dodge, Freeze...)
-- **Procedural Maps** — Each floor generates unique node-based maps
-- **Events & Shops** — Encounter merchants, mysterious springs, sealed chests
-- **Bilingual** — Full Chinese/English support, switchable anytime
-- **Meta Progression** — Earn Abyssal Memory to unlock new cards and heroes
+**Abyssal Codex（深渊牌匣）** is a terminal roguelike card game built with Python and Rich. Every run descends through three procedurally generated floors where you draft cards, collect relics, face branching events, and uncover the truth behind the ancient seal.
 
-### Quick Start
+**Abyssal Codex（深渊牌匣）** 是一款基于 Python + Rich 的终端肉鸽卡牌游戏。每一局都穿越三层程序生成的地图，构筑牌组、收集遗物、应对分支事件，并揭开远古封印背后的真相。
+
+> *"The seal was never meant to keep the Abyss out. It was meant to keep us in."*  
+> *"封印从来不是为了阻挡深渊。而是为了困住我们。"*
+
+---
+
+## 🚀 Quick Start / 快速开始
 
 ```bash
-# Install dependencies
+git clone git@github.com:Linrane/Abyssal-Codex.git
+cd Abyssal-Codex
 pip install -r requirements.txt
-
-# Run the game
 python main.py
 ```
 
-### Controls
-
-| Key | Action |
-|-----|--------|
-| `↑ ↓ ← →` | Navigate menus / Select cards |
-| `Enter` | Confirm |
-| `1-9` | Quick-select card |
-| `E` | End turn (combat) |
-| `D` | View deck |
-| `R` | Redraw hand (with Snake Skin relic) |
-| `Tab` | Switch target (combat) |
-| `L` | Toggle language (main menu) |
-| `ESC` | Back / Quit |
-
-### How to Play
-
-1. **Select a Hero** — Each has unique starting deck, HP, and core mechanics
-2. **Navigate the Map** — Choose your path through combat, events, shops, and rest sites
-3. **Combat** — Spend energy to play cards. Enemy intents are shown before they act
-4. **Build Your Deck** — Add new cards, remove weak ones, collect relics
-5. **Defeat Bosses** — Each floor ends with a boss fight; beat all 3 to win
-6. **Die & Improve** — Earn Abyssal Memory to unlock more content
-
-### Project Structure
-
-```
-Abyssal-Codex/
-├── main.py              # Entry point
-├── abyssal/
-│   ├── engine/          # Combat, effects, AI, game loop
-│   ├── data/            # Card, enemy, relic, hero dataclasses & loader
-│   ├── ui/              # Terminal rendering (Rich-based)
-│   ├── generator/       # Procedural generation
-│   ├── content/         # Story, events, dialogue
-│   ├── save/            # Save/Load system
-│   └── i18n/            # Bilingual strings (zh/en)
-├── data/                # JSON content databases
-├── tests/               # pytest suite
-└── wiki/                # Chinese wiki
-```
-
-### Tech Stack
-
-- **Python 3.10+**
-- **Rich** — Terminal rendering and styling
-- **pytest** — Testing framework
+**Requirements:** Python 3.10+ · [`rich>=13.0.0`](https://github.com/Textualize/rich)
 
 ---
 
-## 中文
+## ✨ Features / 游戏特色
 
-**深渊牌匣** 是一款完全运行在终端中的Roguelike卡牌构筑游戏。通过ASCII艺术画面、深度策略和程序化生成，带来每局独一无二的冒险体验。
+| | |
+|---|---|
+| 🎴 **73 Cards** 卡牌 | Attack · Skill · Power · Curse · Legendary — each upgradeable |
+| 👹 **15 Enemies** 敌人 | Normal · Elite · Boss across 3 themed floors, with phase mechanics |
+| 💎 **26 Relics** 遗物 | Common · Boss · Legendary · Curse tiers with passive & trigger effects |
+| 📜 **18 Events** 事件 | Story-driven branching, class-specific encounters, multi-flag prerequisites |
+| 🦸 **5 Heroes** 英雄 | 2 unlocked initially, 3 unlockable through meta-progression |
+| 🔑 **15 Keywords** 关键词 | Vulnerable · Weak · Poison · Charge · Dodge · Regen · Thorns · Freeze · Resonance · Bloodrage · Strength · Metallic · Intangible · Armor Break · Stances |
+| 🗺️ **Procedural Maps** 程序化地图 | Node-based graph generation with combat/elite/shop/event/rest/start/boss rooms |
+| 🏁 **5 Endings** 结局 | Reseal · Deicide · Liberation · Consumption · Resignation — shaped by your choices |
+| 🏆 **14 Achievements** 成就 | Floor clears · hero wins · no-damage boss · deck challenges · wealth · relic hunting |
+| 💾 **Save System** 存档 | 3-slot SQLite persistence with mid-run resume |
+| 🌐 **Bilingual** 双语 | 548 strings in Chinese & English, switchable at any time (L key) |
+| ⚡ **Meta Progression** 局外成长 | Earn Abyssal Memory to unlock heroes, cards, and relics |
 
-### 特色
+---
 
-- **终端ASCII艺术** — 所有场景用字符画+颜色+布局呈现
-- **4大职业** — 深渊骑士、影织者、符文贤者、血契者（初始解锁2个）
-- **27+卡牌** — 攻击、技能、能力、诅咒、传说牌，支持升级
-- **9种敌人** — 3层深渊中的普通、精英、Boss敌人
-- **10+遗物** — 永久被动装备，塑造你的流派
-- **关键词系统** — 25+种状态效果，产生化学反应（易伤、中毒、充能、闪避、冻结...）
-- **程序化地图** — 每层生成独特节点式地图
-- **事件与商店** — 遭遇流浪商人、神秘泉水、封印宝箱
-- **双语支持** — 完整中/英文，随时切换
-- **局外成长** — 获得深渊记忆，解锁新卡牌与新职业
+## 🎮 Controls / 操作指南
 
-### 快速开始
+| Key 按键 | Action 功能 |
+|:---:|---|
+| `↑ ↓ ← →` | Navigate menus / Select cards 导航/选牌 |
+| `Enter` | Confirm selection 确认 |
+| `1`–`9` | Quick-select card 快速选牌 |
+| `E` | End turn 结束回合 |
+| `D` | Open deck viewer 查看牌组 |
+| `Tab` | Switch target 切换目标 |
+| `R` | Redraw hand 重抽手牌 *(needs Snake Skin)* |
+| `L` | Toggle language 切换语言 *(main menu)* |
+| `ESC` | Back / Quit 返回/退出 |
+
+---
+
+## 🦸 Heroes / 英雄
+
+| Hero 英雄 | HP | ⚡ | Core Mechanic 核心机制 | Unlock 解锁 |
+|---|---|---|---|---|
+| **Abyssal Knight** 深渊骑士 | 80 | 3 | Vulnerable + Armor Break 易伤破甲 | 初始 |
+| **Shadow Weaver** 影织者 | 65 | 3 | Poison + Dodge 中毒闪避 | 初始 |
+| **Rune Sage** 符文贤者 | 60 | 4 | Charge + Resonance 充能共鸣 | 击败10个Boss |
+| **Bloodbinder** 血契者 | 55 | 3 | Bloodrage — lower HP = higher damage 血怒 | 单局使用20次能力牌 |
+| **Wandering Swordmaster** 流浪剑豪 | 70 | 3 | Stance switching 架势切换 | 隐藏职业 |
+
+---
+
+## 📜 Story / 剧情
+
+You descend into the Abyss seeking to repair the ancient seal — but fragments of truth suggest the seal was never broken by accident. Twelve previous heroes are trapped within. An Old God watches from beyond the rift. And the Church may not be what it claims.
+
+你深入深渊修复封印——但碎片化的真相暗示封印从来不是意外崩坏的。十二位前代英雄的灵魂被困其中。旧神在裂隙之外注视。而教会……
+
+**Five paths. One descent.** / **五条道路。一次降临。**
+
+---
+
+## 🗺️ Floors / 深渊层
+
+| Floor | Name | Effect |
+|---|---|---|
+| 1 | **Crumbling Sanctuary** 崩塌圣堂 | Both sides start combat with 1 Vulnerable |
+| 2 | **Gloomwood** 幽暗密林 | From turn 3 onward, everyone gains 1 Poison per turn |
+| 3 | **Star Core Rift** 星核裂隙 | +1 Energy/turn, card costs fluctuate ±1 |
+
+---
+
+## 📂 Project Structure / 项目结构
+
+```
+Abyssal-Codex/
+├── main.py                    # Entry point 入口
+├── requirements.txt           # rich, pytest
+├── abyssal/
+│   ├── engine/                # Combat, effects, AI, game loop
+│   ├── data/                  # Dataclasses + JSON loader
+│   ├── ui/                    # Terminal UI (Rich-based)
+│   ├── generator/             # Procedural map/reward generation
+│   ├── content/               # Story flags, event runner
+│   ├── save/                  # SQLite persistence
+│   └── i18n/                  # 548 bilingual strings (zh/en)
+├── data/                      # JSON content databases
+│   ├── cards/                 # 73 cards (core, class, legendary, curse)
+│   ├── enemies/               # 15 enemies across 3 floors
+│   ├── relics/                # 26 relics (common + special)
+│   └── events/                # 18 events with branching
+└── tests/                     # 62 pytest cases
+```
+
+---
+
+## 🧪 Testing / 测试
 
 ```bash
-# 安装依赖
-pip install -r requirements.txt
-
-# 运行游戏
-python main.py
+pytest tests/ -v          # 62 tests, all passing
+pytest tests/ --cov=abyssal  # with coverage
 ```
-
-### 操作指南
-
-| 按键 | 功能 |
-|------|------|
-| `↑ ↓ ← →` | 菜单导航 / 选牌 |
-| `Enter` | 确认 |
-| `1-9` | 快速选牌 |
-| `E` | 结束回合（战斗） |
-| `D` | 查看牌组 |
-| `R` | 重抽手牌（需蛇之蜕皮遗物） |
-| `Tab` | 切换目标（战斗） |
-| `L` | 切换语言（主菜单） |
-| `ESC` | 返回 / 退出 |
-
-### 玩法说明
-
-1. **选择英雄** — 每位英雄有独特的初始牌组、生命值与核心机制
-2. **探索地图** — 在战斗、事件、商店、休息点之间规划路线
-3. **战斗** — 消耗能量打出卡牌，敌方意图会提前展示
-4. **构筑牌组** — 添加新卡，移除废牌，收集遗物
-5. **击败Boss** — 每层守关Boss；通关3层即为胜利
-6. **死亡与成长** — 获得深渊记忆，解锁更多内容
-
-### 项目结构
-
-```
-Abyssal-Codex/
-├── main.py              # 入口
-├── abyssal/
-│   ├── engine/          # 战斗、效果、AI、游戏循环
-│   ├── data/            # 数据类定义与JSON加载器
-│   ├── ui/              # 终端渲染（基于Rich）
-│   ├── generator/       # 程序化生成
-│   ├── content/         # 剧情、事件、对话
-│   ├── save/            # 存档系统
-│   └── i18n/            # 双语字符串（中/英）
-├── data/                # JSON内容数据库
-├── tests/               # pytest测试
-└── wiki/                # 中文维基
-```
-
-### 技术栈
-
-- **Python 3.10+**
-- **Rich** — 终端渲染与样式
-- **pytest** — 测试框架
 
 ---
 
-## License
+## 📖 Wiki / 维基
 
-MIT
+Full documentation is on the **[GitHub Wiki](https://github.com/Linrane/Abyssal-Codex/wiki)** — hero guides, card catalog, enemy compendium, relic reference, event walkthroughs, keyword mechanics, ending conditions, and strategy tips.
+
+完整文档见 **[GitHub Wiki](https://github.com/Linrane/Abyssal-Codex/wiki)** —— 英雄攻略、卡牌目录、敌人图鉴、遗物参考、事件详解、关键词机制、结局条件、策略技巧。
+
+---
+
+<p align="center">
+  <samp>v0.2.0 · <a href="https://github.com/Linrane/Abyssal-Codex/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · MIT License</samp>
+</p>
