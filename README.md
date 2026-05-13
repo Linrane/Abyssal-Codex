@@ -1,49 +1,45 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/version-0.2.0-8b5cf6?style=flat-square" alt="version">
-<img src="https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square" alt="python">
-<img src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square" alt="license">
-<img src="https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square" alt="tests">
-<img src="https://img.shields.io/badge/i18n-中文_|_English-f59e0b?style=flat-square" alt="i18n">
+![version](https://img.shields.io/badge/version-0.2.0-8b5cf6?style=flat-square)
+![python](https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square)
+![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
+![tests](https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square)
+![i18n](https://img.shields.io/badge/i18n-中文_|_English-f59e0b?style=flat-square)
 
 </div>
 
 <br>
 
-<div align="center">
+<h1 align="center">
+  🃏 Abyssal Codex<br>
+  <sub>深渊牌匣</sub>
+</h1>
 
-```
-┌─────────────────────────────────────────┐
-│                                         │
-│      A B Y S S A L   C O D E X          │
-│          深  渊  牌  匣                 │
-│                                         │
-│    Terminal Roguelike Card Game         │
-│        终端肉鸽卡牌冒险                 │
-│                                         │
-└─────────────────────────────────────────┘
-```
+<p align="center"><strong>Terminal Roguelike Card Game · 终端肉鸽卡牌冒险</strong></p>
 
-</div>
-
-<br>
-
-<div align="center">
-
-[📖 Wiki 维基](https://github.com/Linrane/Abyssal-Codex/wiki) · [🚀 Quick Start](#-quick-start--快速开始) · [✨ Features](#-features--游戏特色) · [🎮 Controls](#-controls--操作指南) · [🦸 Heroes](#-heroes--英雄) · [📜 Story](#-story--剧情)
-
-</div>
+<p align="center">
+  <a href="https://github.com/Linrane/Abyssal-Codex/wiki">📖 Wiki</a>
+  ·
+  <a href="#-quick-start--快速开始">🚀 Quick Start</a>
+  ·
+  <a href="#-features--游戏特色">✨ Features</a>
+  ·
+  <a href="#-controls--操作指南">🎮 Controls</a>
+  ·
+  <a href="#-heroes--英雄">🦸 Heroes</a>
+  ·
+  <a href="#-story--剧情">📜 Story</a>
+</p>
 
 ---
 
-## 🃏 About / 关于
-
-**Abyssal Codex（深渊牌匣）** is a terminal roguelike card game built with Python and Rich. Every run descends through three procedurally generated floors where you draft cards, collect relics, face branching events, and uncover the truth behind the ancient seal.
-
-**Abyssal Codex（深渊牌匣）** 是一款基于 Python + Rich 的终端肉鸽卡牌游戏。每一局都穿越三层程序生成的地图，构筑牌组、收集遗物、应对分支事件，并揭开远古封印背后的真相。
-
-> *"The seal was never meant to keep the Abyss out. It was meant to keep us in."*  
+> *"The seal was never meant to keep the Abyss out. It was meant to keep us in."*
+>
 > *"封印从来不是为了阻挡深渊。而是为了困住我们。"*
+
+**Abyssal Codex** is a terminal roguelike card game built with Python and Rich. Each run descends through three procedurally generated floors — draft cards, collect relics, face branching events, and uncover the truth behind the ancient seal.
+
+**深渊牌匣**是一款基于 Python + Rich 的终端肉鸽卡牌游戏。每一局穿越三层程序生成的地图，构筑牌组、收集遗物、应对分支事件，揭开远古封印背后的真相。
 
 ---
 
@@ -169,5 +165,5 @@ Full documentation is on the **[GitHub Wiki](https://github.com/Linrane/Abyssal-
 ---
 
 <p align="center">
-  <samp>v0.2.0 · <a href="https://github.com/Linrane/Abyssal-Codex/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · MIT License</samp>
+  <samp>v0.2.0 · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · <a href="https://github.com/Linrane/Abyssal-Codex/wiki">Wiki</a> · MIT License</samp>
 </p>
