@@ -1,6 +1,6 @@
 <div align="center">
 
-![version](https://img.shields.io/badge/version-0.2.0-8b5cf6?style=flat-square)
+![version](https://img.shields.io/badge/version-0.3.0-8b5cf6?style=flat-square)
 ![python](https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
 ![tests](https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square)
@@ -60,17 +60,18 @@ python main.py
 
 | | |
 |---|---|
-| 🎴 **73 Cards** 卡牌 | Attack · Skill · Power · Curse · Legendary — each upgradeable |
-| 👹 **15 Enemies** 敌人 | Normal · Elite · Boss across 3 themed floors, with phase mechanics |
+| 🎴 **75 Cards** 卡牌 | Attack · Skill · Power · Curse · Legendary — each upgradeable with card art |
+| 👹 **15 Enemies** 敌人 | Normal · Elite · Boss across 3 themed floors, with intent display & phase mechanics |
 | 💎 **26 Relics** 遗物 | Common · Boss · Legendary · Curse tiers with passive & trigger effects |
-| 📜 **18 Events** 事件 | Story-driven branching, class-specific encounters, multi-flag prerequisites |
+| 📜 **18 Events** 事件 | Story-driven branching, class-specific encounters, typewriter narrative |
 | 🦸 **5 Heroes** 英雄 | 2 unlocked initially, 3 unlockable through meta-progression |
 | 🔑 **15 Keywords** 关键词 | Vulnerable · Weak · Poison · Charge · Dodge · Regen · Thorns · Freeze · Resonance · Bloodrage · Strength · Metallic · Intangible · Armor Break · Stances |
-| 🗺️ **Procedural Maps** 程序化地图 | Node-based graph generation with combat/elite/shop/event/rest/start/boss rooms |
+| 🗺️ **Procedural Maps** 程序化地图 | Node graph with box-drawing connectors, combat/elite/shop/event/rest/boss |
 | 🏁 **5 Endings** 结局 | Reseal · Deicide · Liberation · Consumption · Resignation — shaped by your choices |
-| 🏆 **14 Achievements** 成就 | Floor clears · hero wins · no-damage boss · deck challenges · wealth · relic hunting |
+| 🏆 **14 Achievements** 成就 | Floor clears · hero wins · deck challenges · wealth · relic hunting · ending-based |
+| 🎨 **Rich UI** 界面 | Panel-based layout, card widgets, color-coded types, anti-fool confirmations |
 | 💾 **Save System** 存档 | 3-slot SQLite persistence with mid-run resume |
-| 🌐 **Bilingual** 双语 | 548 strings in Chinese & English, switchable at any time (L key) |
+| 🌐 **Bilingual** 双语 | ~590 strings in Chinese & English, switchable at any time (L key) |
 | ⚡ **Meta Progression** 局外成长 | Earn Abyssal Memory to unlock heroes, cards, and relics |
 
 ---
@@ -82,11 +83,12 @@ python main.py
 | `↑ ↓ ← →` | Navigate menus / Select cards 导航/选牌 |
 | `Enter` | Confirm selection 确认 |
 | `1`–`9` | Quick-select card 快速选牌 |
-| `E` | End turn 结束回合 |
-| `D` | Open deck viewer 查看牌组 |
+| `E` | End turn 结束回合 (confirms if cards remain) |
+| `D` | Open deck viewer 查看牌组 (categorized by type) |
 | `Tab` | Switch target 切换目标 |
 | `R` | Redraw hand 重抽手牌 *(needs Snake Skin)* |
 | `L` | Toggle language 切换语言 *(main menu)* |
+| `S` | Skip card reward 跳过卡牌奖励 |
 | `ESC` | Back / Quit 返回/退出 |
 
 ---
@@ -165,5 +167,5 @@ Full documentation is on the **[GitHub Wiki](https://github.com/Linrane/Abyssal-
 ---
 
 <p align="center">
-  <samp>v0.2.0 · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · <a href="https://github.com/Linrane/Abyssal-Codex/wiki">Wiki</a> · MIT License</samp>
+  <samp>v0.3.0 · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · <a href="https://github.com/Linrane/Abyssal-Codex/wiki">Wiki</a> · MIT License</samp>
 </p>

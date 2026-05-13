@@ -1,4 +1,11 @@
-"""Rich-based terminal application shell with keyboard input handling."""
+"""Rich-based terminal application shell with keyboard input handling.
+
+Layout follows the framework spec (Section 12):
+  Top 1/3    — Scene / Map / ASCII art + environment description
+  Mid 1/3    — Enemies (left) + Status/Options (right) during combat
+  Bottom 1/3 — Hand cards (horizontal, 5-8 visible)
+  Bottom bar — HP / Energy / Relic icons + control hints
+"""
 
 import sys
 import random
@@ -10,10 +17,13 @@ from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
+from rich.table import Table
+from rich.align import Align
+from rich.style import Style
 from rich import box
-
 from abyssal.engine.game import GameEngine, RunState, RunPhase, RoomType
 from abyssal.engine.combat import CombatEngine, CombatState
+from abyssal.data.cards import Card, CardType
 from abyssal.i18n import t
 
 # Platform-specific keyboard input
@@ -24,6 +34,49 @@ else:
     import tty
 
 
+# ── Color Palette (framework Section 3.2) ──────────────────────────────
+
+COLOR_ATTACK = Style(color="#FF4444")
+COLOR_SKILL = Style(color="#4488FF")
+COLOR_POWER = Style(color="#44FF44")
+COLOR_CURSE = Style(color="#AA44FF")
+COLOR_LEGENDARY = Style(color="#FFAA00")
+COLOR_RARE = Style(color="#4488FF")
+COLOR_EPIC = Style(color="#AA44FF")
+COLOR_GOLD = Style(color="#FFDD44")
+COLOR_HP_GREEN = Style(color="#44FF44")
+COLOR_HP_YELLOW = Style(color="#FFCC00")
+COLOR_HP_RED = Style(color="#FF4444")
+COLOR_BLOCK = Style(color="#4488FF")
+COLOR_ENERGY = Style(color="#FFAA00")
+COLOR_GREEN = Style(color="#44FF44")
+COLOR_DIM = Style(color="#8B949E")
+COLOR_BRIGHT = Style(color="#E6EDF3")
+COLOR_HIGHLIGHT = Style(color="#FFAA00")
+COLOR_BORDER = Style(color="#30363D")
+COLOR_BG = Style(bgcolor="#0D1117")
+
+COLOR_NODE = {
+    RoomType.START: Style(color="#4488FF"),
+    RoomType.COMBAT: Style(color="#FF4444"),
+    RoomType.ELITE: Style(color="#FF8844"),
+    RoomType.SHOP: Style(color="#FFDD44"),
+    RoomType.EVENT: Style(color="#44DDDD"),
+    RoomType.REST: Style(color="#44FF44"),
+    RoomType.BOSS: Style(color="#FF0044"),
+}
+
+CARD_TYPE_COLOR = {
+    "attack": COLOR_ATTACK,
+    "skill": COLOR_SKILL,
+    "power": COLOR_POWER,
+    "curse": COLOR_CURSE,
+    "legendary": COLOR_LEGENDARY,
+}
+
+
+# ── Key Handler ────────────────────────────────────────────────────────
+
 class KeyHandler:
     """Cross-platform keyboard input handler."""
 
@@ -31,7 +84,6 @@ class KeyHandler:
         self._win = sys.platform == "win32"
 
     def get_key(self) -> str:
-        """Get a single keypress. Returns key name string."""
         if self._win:
             return self._get_key_windows()
         else:
@@ -39,11 +91,11 @@ class KeyHandler:
 
     def _get_key_windows(self) -> str:
         key = msvcrt.getch()
-        if key == b'\xe0':  # Arrow keys prefix
+        if key == b'\xe0':
             key = msvcrt.getch()
             arrow_map = {b'H': 'up', b'P': 'down', b'K': 'left', b'M': 'right'}
             return arrow_map.get(key, 'unknown')
-        elif key == b'\x00':  # Extended key prefix
+        elif key == b'\x00':
             key = msvcrt.getch()
             return 'unknown'
         elif key == b'\r':
@@ -69,7 +121,6 @@ class KeyHandler:
             tty.setraw(fd)
             key = sys.stdin.read(1)
             if key == '\x1b':
-                # Escape sequence
                 seq = sys.stdin.read(2)
                 if seq == '[':
                     k = sys.stdin.read(1)
@@ -89,8 +140,154 @@ class KeyHandler:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
+# ── Rendering Helpers ──────────────────────────────────────────────────
+
+def _hp_bar(current: int, maximum: int, width: int = 12) -> str:
+    """Render HP bar: ████░░░░  (framework Section 3.1)."""
+    if maximum <= 0:
+        return "☠ DEAD"
+    pct = max(0.0, min(1.0, current / maximum))
+    filled = int(width * pct)
+    return "█" * filled + "░" * (width - filled)
+
+
+def _hp_color(current: int, maximum: int) -> Style:
+    """Color HP bar based on percentage."""
+    pct = current / max(1, maximum)
+    if pct > 0.6:
+        return COLOR_HP_GREEN
+    elif pct > 0.3:
+        return COLOR_HP_YELLOW
+    return COLOR_HP_RED
+
+
+def _card_name(card: Card, lang: str = "zh") -> str:
+    """Get localized card name with upgrade marker."""
+    name = t(card.name_key, lang)
+    if card.upgraded:
+        name = "+" + name
+    return name
+
+
+def _status_icons(combatant) -> str:
+    """Build status effects icon string (framework Section 5.3 keywords)."""
+    icons = {
+        "vulnerable": "💔", "weak": "💜", "poison": "☠",
+        "charge": "⚡", "dodge": "💨", "regen": "💚",
+        "thorns": "🌿", "freeze": "❄", "bloodrage": "🩸",
+        "strength": "💪", "metallic": "🛡", "intangible": "👻",
+        "attack": "⚔", "defense": "🛡", "gale": "🌀",
+    }
+    parts = []
+    for name, status in combatant.statuses.items():
+        if status.stacks > 0:
+            icon = icons.get(name, "•")
+            parts.append(f"{icon}:{status.stacks}")
+    return "  ".join(parts) if parts else ""
+
+
+def _intent_display(intent_type: str, value: int = 0, status: str = "", status_value: int = 0, lang: str = "zh") -> str:
+    """Render enemy intent with icon + value (framework Section 6.1)."""
+    icons = {"attack": "⚔", "defend": "🛡", "skill": "💀", "special": "❓"}
+    icon = icons.get(intent_type, "?")
+    label = t(f"intent.{intent_type}", lang)
+
+    if intent_type == "attack":
+        return f"{icon} {label} {value}"
+    elif intent_type == "defend":
+        return f"{icon} {label} {value}"
+    elif intent_type in ("skill", "special"):
+        if status:
+            return f"{icon} {label}: {status} x{status_value}"
+        return f"{icon} {label}"
+    return f"{icon} ???"
+
+
+# ── Card Widget Renderer (framework Section 3.1: 7×14 card) ────────────
+
+def render_card_mini(card: Card, lang: str = "zh", selected: bool = False, playable: bool = True) -> str:
+    """Render a single card as a 7-line × 16-char mini card."""
+    cost = card.get_cost()
+    cost_str = f"{cost}⚡"
+    name = _card_name(card, lang)[:12]
+    ctype = t(f"card.type.{card.card_type.value}", lang)
+    rarity = t(f"rarity.{card.rarity.value}", lang)
+    type_str = f"[{ctype}]" if len(ctype) <= 3 else ctype[:4]
+
+    # Description
+    desc = t(card.desc_key, lang)
+    effects = card.get_effects()
+    args = []
+    for eff in effects:
+        val = getattr(eff, 'value', 0) if hasattr(eff, 'value') else eff.get('value', 0)
+        if hasattr(eff, 'type'):
+            etype = eff.type
+        else:
+            etype = eff.get('type', '')
+        if etype in ("damage", "block", "heal", "apply_status", "draw", "gain_energy"):
+            args.append(str(val))
+    try:
+        desc = desc.format(*args)
+    except (IndexError, KeyError):
+        pass
+    if len(desc) > 27:
+        desc = desc[:25] + ".."
+
+    color_style = CARD_TYPE_COLOR.get(card.card_type.value, COLOR_BRIGHT)
+    dim_style = COLOR_DIM if not playable else color_style
+
+    top = "┏" + "━" * 14 + "┓" if selected else "┌" + "─" * 14 + "┐"
+    bot = "┗" + "━" * 14 + "┛" if selected else "└" + "─" * 14 + "┘"
+    sel_marker = "▶" if selected else " "
+
+    lines = [
+        top,
+        f"│ {sel_marker}{name:<12} │",
+        f"│ {cost_str:<3} {type_str:<9} │",
+        f"│ {desc[:14]:<14} │",
+        f"│ {desc[14:28]:<14} │" if len(desc) > 14 else "│" + " " * 14 + "│",
+        f"│ {' ' * 14} │",
+        bot,
+    ]
+    return "\n".join(lines)
+
+
+def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> str:
+    """Render full hand horizontally — framework Section 3.1 / 12 bottom."""
+    if not hand:
+        return ""
+
+    card_lines = []
+    for i, card in enumerate(hand):
+        cost = card.get_cost()
+        playable = cost <= energy
+        lines = render_card_mini(card, lang, selected=(i == selected_idx), playable=playable)
+        card_lines.append(lines.split("\n"))
+
+    height = 7
+    result = []
+    for row in range(height):
+        row_str = ""
+        for cl in card_lines:
+            if row < len(cl):
+                row_str += cl[row] + " "
+            else:
+                row_str += " " * 17
+        result.append(row_str)
+    return "\n".join(result)
+
+
+# ── Game Application ───────────────────────────────────────────────────
+
 class GameApp:
-    """Main game application using Rich for terminal rendering."""
+    """Main game application using Rich for terminal rendering.
+
+    Layout follows framework Section 12:
+      - Top: Scene / Map / ASCII art
+      - Mid: Enemies (left) + Status (right) or Event choices
+      - Bottom: Hand cards (horizontal)
+      - Footer: HP / Energy / Relic icons + controls
+    """
 
     def __init__(self):
         self.console = Console()
@@ -98,20 +295,69 @@ class GameApp:
         self.lang = "zh"
         self.running = True
         self.key_handler = KeyHandler()
-
-        # UI state
         self.current_screen = "main_menu"
         self.screen_data: dict = {}
         self.message: str = ""
         self.message_timer: int = 0
 
-    def run(self) -> None:
-        """Main application loop."""
+    # ── Helpers ──────────────────────────────────────────────────────
+
+    def _make_menu_panel(self, options: list[tuple[str, str]], selected: int,
+                         title: str = "", can_confirm: list[bool] = None) -> Panel:
+        """Build a menu options panel."""
+        lines = []
+        for i, (key, label) in enumerate(options):
+            cursor = "►" if i == selected else " "
+            disabled = can_confirm and not can_confirm[i]
+            if disabled:
+                line = f" {cursor}  {key}. {label} {t('hint.disabled', self.lang)}"
+            else:
+                line = f" {cursor}  {key}. {label}"
+            lines.append(line)
+        content = "\n".join(lines)
+        return Panel(content, title=title, border_style=COLOR_DIM, box=box.ROUNDED)
+
+    def _confirm(self, message: str, default_no: bool = True) -> bool:
+        """Anti-fool confirmation dialog. Returns True if confirmed."""
         self.console.clear()
-        self._show_main_menu()
+        selected = 1 if default_no else 0  # 0=Yes, 1=No
+        while True:
+            self.console.clear()
+            lines = [
+                "",
+                f"  ⚠  {message}",
+                "",
+            ]
+            for i, label in enumerate([
+                f"► {t('confirm.yes', self.lang)}" if selected == 0 else f"  {t('confirm.yes', self.lang)}",
+                f"► {t('confirm.no', self.lang)}" if selected == 1 else f"  {t('confirm.no', self.lang)}",
+            ]):
+                lines.append(f"     {label}")
+            lines.append("")
+            lines.append(f"  ↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)}")
+
+            for line in lines:
+                self.console.print(line)
+
+            key = self.key_handler.get_key()
+            if key in ('up', 'down'):
+                selected = 1 - selected
+            elif key == 'enter':
+                return selected == 0
+            elif key in ('escape', 'n'):
+                return False
+            elif key == 'y':
+                return True
+
+    def _show_message(self, text: str):
+        """Flash a temporary message."""
+        self.message = text
+        self.message_timer = 3
+
+    # ── Main Menu ────────────────────────────────────────────────────
+    # Framework Section 3.1: ASCII art title, colorized, controls legend
 
     def _show_main_menu(self) -> None:
-        """Display the main menu."""
         self.current_screen = "main_menu"
         menu_options = [
             ("1", t("menu.new_game", self.lang)),
@@ -121,32 +367,64 @@ class GameApp:
         ]
         selected = 0
 
+        # Check if saves exist for Continue option
+        from abyssal.save.save_manager import SaveManager
+        sm = SaveManager()
+        saves = sm.list_saves()
+        can_confirm = [True, bool(saves), True, True]
+
         while self.running:
             self.console.clear()
 
-            # Title art
-            title = t("game.title", self.lang)
-            subtitle = t("game.subtitle", self.lang)
+            # Title — centered, styled
+            title_text = Text()
+            title_text.append("🃏  ", style=COLOR_LEGENDARY)
+            title_text.append("A B Y S S A L   C O D E X", style=Style(color="#E6EDF3", bold=True))
+            title_line2 = Text("深  渊  牌  匣", style=Style(color="#FFAA00", bold=True))
+            subtitle = Text("Terminal Roguelike Card Game · 终端肉鸽卡牌冒险", style=COLOR_DIM)
 
-            lines = []
-            lines.append("")
-            lines.append("  🃏  ╔══════════════════════════════════════╗  🃏")
-            lines.append(f"     ║        {title:^28} ║")
-            lines.append(f"     ║     {subtitle:^30} ║")
-            lines.append("     ╚══════════════════════════════════════╝")
-            lines.append("")
-            lines.append("          ╔══════════════════════╗")
-
+            # Menu panel
+            menu_items = []
             for i, (key, label) in enumerate(menu_options):
-                cursor = "► " if i == selected else "  "
-                lines.append(f"          ║ {cursor}{key}. {label:<20}║")
+                cursor = "►" if i == selected else " "
+                disabled_hint = ""
+                if not can_confirm[i]:
+                    disabled_hint = f"  [{t('menu.no_save_hint', self.lang)}]"
+                menu_items.append(f" {cursor}  {key}. {label}{disabled_hint}")
 
-            lines.append("          ╚══════════════════════╝")
-            lines.append("")
-            lines.append(f"     🎮 ↑↓ 导航 | Enter 确认 | {t('menu.lang_zh', self.lang)}/{t('menu.lang_en', self.lang)} 切换")
+            menu_panel = Panel(
+                "\n".join(menu_items),
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+                padding=(1, 4),
+            )
 
-            for line in lines:
-                self.console.print(line)
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | "
+                f"1-4 {t('menu.select', self.lang)} | L 中文/English | ESC {t('menu.quit', self.lang)}",
+                style=COLOR_DIM,
+            )
+            version = Text("v0.3.0 · MIT License", style=COLOR_DIM)
+
+            # Compose layout
+            layout_lines = [
+                "",
+                Align.center(title_text),
+                Align.center(title_line2),
+                Align.center(subtitle),
+                "",
+                Align.center(menu_panel),
+                "",
+                Align.center(controls),
+                "",
+                Align.center(version),
+            ]
+
+            for item in layout_lines:
+                if isinstance(item, str):
+                    self.console.print(item)
+                else:
+                    self.console.print(item)
 
             key = self.key_handler.get_key()
 
@@ -155,6 +433,8 @@ class GameApp:
             elif key == 'down':
                 selected = (selected + 1) % len(menu_options)
             elif key == 'enter':
+                if not can_confirm[selected]:
+                    continue
                 if selected == 0:
                     self._show_hero_select()
                 elif selected == 1:
@@ -165,14 +445,13 @@ class GameApp:
                     self.running = False
             elif key == '1':
                 self._show_hero_select()
-            elif key == '2':
+            elif key == '2' and can_confirm[1]:
                 self._continue_game()
             elif key == '3':
                 self._show_settings()
             elif key == '4':
                 self.running = False
             elif key == 'l':
-                # Quick language toggle
                 self.lang = "en" if self.lang == "zh" else "zh"
                 self.engine.lang = self.lang
             elif key in ('q', 'escape'):
@@ -181,128 +460,208 @@ class GameApp:
             if not self.running:
                 break
 
+    # ── Hero Select ──────────────────────────────────────────────────
+    # Framework Section 4: hero cards with stats, unlock conditions
+
     def _show_hero_select(self) -> None:
-        """Hero selection screen."""
         self.current_screen = "hero_select"
+        self.engine.load_data()
         heroes = self.engine.get_unlocked_heroes()
+        # Also show locked heroes (all heroes)
+        all_heroes = list(self.engine._all_heroes.values())
         selected = 0
 
         while self.running:
             self.console.clear()
+            self.console.print("")
+            self.console.print(Align.center(
+                Text(t("hero.select", self.lang), style=Style(bold=True, color="#E6EDF3"))
+            ))
+            self.console.print("")
 
-            lines = []
-            lines.append(f"\n  ╔══ {t('hero.select', self.lang)} ══╗\n")
+            for i, hero in enumerate(all_heroes):
+                is_selected = i == selected
+                is_locked = not hero.unlocked
 
-            for i, hero in enumerate(heroes):
-                cursor = "► " if i == selected else "  "
+                border = "━" if is_selected else "─"
+                top = "┏" if is_selected else "┌"
+                bot = "┗" if is_selected else "└"
+                cursor = "►" if is_selected else " "
+                width = 46
+
                 hero_name = t(hero.name_key, self.lang)
                 hero_desc = t(hero.desc_key, self.lang)
                 mechanic = t(hero.core_mechanic_key, self.lang)
+                hp_str = _hp_bar(hero.max_hp, 80, 10)
+                en_str = "⚡" * hero.max_energy
 
-                lines.append(f"  {cursor}┌{'─' * 38}┐")
-                lines.append(f"     │ {hero_name:<36} │")
-                lines.append(f"     │ {hero_desc[:36]:<36} │")
-                lines.append(f"     │ {t('hero.hp', self.lang)}: {hero.max_hp:<3} {t('hero.energy', self.lang)}: {hero.max_energy:<3}  {t('hero.mechanic', self.lang)}: {mechanic:<12} │")
-                lines.append(f"     └{'─' * 38}┘")
-                lines.append("")
+                if is_locked:
+                    lock_info = ""
+                    if hero.id == "sage":
+                        lock_info = t("hero.unlock_boss", self.lang)
+                    elif hero.id == "blood":
+                        lock_info = t("hero.unlock_power", self.lang)
+                    elif hero.id == "swordmaster":
+                        lock_info = t("hero.unlock_swordmaster", self.lang)
+                    lock_text = f"🔒 {t('hero.locked', self.lang)}: {lock_info}"
 
-            lines.append(f"  ↑↓ {t('menu.select', self.lang)} | ESC {t('menu.back', self.lang)}")
+                lines = []
+                lines.append(f"  {cursor}{top}{border * (width - 2)}{bot}")
+                lines.append(f"     │ {hero_name:<{width - 2}} │")
+                if is_locked:
+                    lines.append(f"     │ {lock_text:<{width - 2}} │")
+                else:
+                    lines.append(f"     │ {hero_desc[:width - 2]:<{width - 2}} │")
+                lines.append(f"     │ {t('hero.hp', self.lang)}: {hero.max_hp} {hp_str}  {t('hero.energy', self.lang)}: {en_str} │")
+                lines.append(f"     │ {t('hero.mechanic', self.lang)}: {mechanic:<{width - 18}} │")
+                lines.append(f"  {' ' * 1}{bot}{border * (width - 2)}{top}")
 
-            for line in lines:
-                self.console.print(line)
+                for line in lines:
+                    self.console.print(line)
+                self.console.print("")
+
+            controls = Text(
+                f"←→ {t('hero.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | "
+                f"1-5 {t('hero.select', self.lang)} | ESC {t('menu.back', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
-
-            if key == 'up':
-                selected = (selected - 1) % len(heroes)
+            if key == 'left':
+                selected = (selected - 1) % len(all_heroes)
+            elif key == 'right':
+                selected = (selected + 1) % len(all_heroes)
+            elif key == 'up':
+                selected = (selected - 1) % len(all_heroes)
             elif key == 'down':
-                selected = (selected + 1) % len(heroes)
+                selected = (selected + 1) % len(all_heroes)
             elif key == 'enter':
-                if heroes[selected].unlocked:
-                    self.engine.start_run(heroes[selected].id)
+                hero = all_heroes[selected]
+                if hero.unlocked:
+                    self.engine.start_run(hero.id)
                     self._show_map()
-                else:
-                    self.message = "Hero not yet unlocked!"
-                    self.message_timer = 5
+                    return
             elif key in ('escape', 'q'):
                 self._show_main_menu()
                 return
+            elif key in (str(i) for i in range(1, len(all_heroes) + 1)):
+                idx = int(key) - 1
+                if idx < len(all_heroes) and all_heroes[idx].unlocked:
+                    self.engine.start_run(all_heroes[idx].id)
+                    self._show_map()
+                    return
+
+    # ── Map Navigation ───────────────────────────────────────────────
+    # Framework Section 7: node graph with box-drawing connectors
 
     def _show_map(self) -> None:
-        """Map navigation screen."""
         self.current_screen = "map"
 
-        while self.running and self.engine.state and self.engine.state.phase == RunPhase.MAP:
+        while self.running and self.engine.state and self.engine.state.phase in (RunPhase.MAP, RunPhase.COMBAT, RunPhase.EVENT, RunPhase.SHOP, RunPhase.REST):
             self.console.clear()
             state = self.engine.state
             fm = state.floor_map
-
             if not fm:
                 break
 
-            # Get floor data
             floor_name = t(f"floor.{state.current_floor}.name", self.lang)
+            floor_effect = t(f"floor.{state.current_floor}.effect", self.lang)
             floor_desc = t(f"floor.{state.current_floor}.desc", self.lang)
 
-            lines = []
-            lines.append(f"\n  ╔══ {t('map.floor', self.lang)} {state.current_floor}: {floor_name} ══╗")
-            lines.append(f"  ║  {floor_desc}")
-            lines.append(f"  ║  {t('hp_bar', self.lang)} HP: {state.hp}/{state.max_hp}  💰 {state.gold}")
-            lines.append("")
+            # Header panel
+            header = Panel(
+                f"[bold]{floor_name}[/bold]\n{floor_desc}\n[dim]{floor_effect}[/dim]",
+                border_style=COLOR_NODE.get(RoomType.START, COLOR_DIM),
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
 
-            # Render map nodes
+            # Status bar
+            hp_bar = _hp_bar(state.hp, state.max_hp, 14)
+            hp_style = _hp_color(state.hp, state.max_hp)
+            status_line = Text()
+            status_line.append("❤ ", style=hp_style)
+            status_line.append(f"{hp_bar} {state.hp}/{state.max_hp}  ", style=hp_style)
+            status_line.append(f"💰 {state.gold}  ", style=COLOR_GOLD)
+            status_line.append(f"🃏 {len(state.deck)} ", style=COLOR_DIM)
+            status_line.append(f"| 🏺 {len(state.relics)}", style=COLOR_DIM)
+            self.console.print(Align.center(status_line))
+            self.console.print("")
+
+            # Node graph — framework Section 7.2, 12
             available = set(self.engine.get_available_nodes())
-            max_row = max((n.row for n in fm.nodes.values()), default=0)
+            current_node_id = fm.current_node
+            nodes = fm.nodes
 
             icons = {
-                RoomType.START: "🏁",
-                RoomType.COMBAT: "⚔",
-                RoomType.ELITE: "💀",
-                RoomType.SHOP: "💰",
-                RoomType.EVENT: "❓",
-                RoomType.REST: "🏕",
-                RoomType.BOSS: "👁",
+                RoomType.START: "🏁", RoomType.COMBAT: "⚔", RoomType.ELITE: "💀",
+                RoomType.SHOP: "💰", RoomType.EVENT: "❓", RoomType.REST: "🏕", RoomType.BOSS: "👑",
+            }
+            node_labels = {
+                RoomType.START: t("map.room_start", self.lang),
+                RoomType.COMBAT: t("map.room_combat", self.lang),
+                RoomType.ELITE: t("map.room_elite", self.lang),
+                RoomType.SHOP: t("map.room_shop", self.lang),
+                RoomType.EVENT: t("map.room_event", self.lang),
+                RoomType.REST: t("map.room_rest", self.lang),
+                RoomType.BOSS: t("map.room_boss", self.lang),
             }
 
+            max_row = max((n.row for n in nodes.values()), default=0)
+
             for row in range(max_row + 1):
-                row_nodes = sorted(
-                    [n for n in fm.nodes.values() if n.row == row],
-                    key=lambda n: n.col,
-                )
-                row_str = "  "
+                row_nodes = sorted([n for n in nodes.values() if n.row == row], key=lambda n: n.col)
+                row_parts = []
                 for node in row_nodes:
                     icon = icons.get(node.room_type, "?")
-                    marker = ""
-                    if node.id == fm.current_node:
-                        marker = "◄"
+                    label = node_labels.get(node.room_type, "?")
+
+                    if node.id == current_node_id:
+                        marker = f"[{t('map.you_are_here', self.lang)}]"
+                        node_style = COLOR_HIGHLIGHT
                     elif node.visited:
                         marker = "✓"
+                        node_style = COLOR_DIM
                     elif node.id in available:
                         marker = "→"
-                    row_str += f" {marker}{icon} "
-                lines.append(row_str)
+                        node_style = COLOR_NODE.get(node.room_type, COLOR_BRIGHT)
+                    else:
+                        marker = " "
+                        node_style = COLOR_DIM
 
-            lines.append("")
-            lines.append(f"  ↑↓←→ {t('map.navigate', self.lang)} | D {t('deck.title', self.lang)} | ESC Menu")
+                    row_parts.append(
+                        f" {marker}{icon} {label} "
+                    )
 
-            for line in lines:
-                self.console.print(line)
+                # Add connector lines between nodes
+                line = "     " + "  ──  ".join(row_parts) if row_parts else ""
+                if line.strip():
+                    self.console.print(line)
+
+            self.console.print("")
+
+            # Controls
+            controls = Text(
+                f"↑↓←→ Enter {t('map.navigate', self.lang)} | D {t('deck.title', self.lang)} | ESC {t('menu.back', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
-
             if key in ('escape',):
                 break
             elif key in ('d',):
                 self._show_deck_view()
             elif key in ('up', 'down', 'left', 'right', 'enter'):
-                # Pick first available node
                 avail = sorted(available)
                 if avail:
                     node_id = avail[0]
                     self.engine.move_to_node(node_id)
                     node = fm.nodes[node_id]
+                    self.engine.state.phase = RunPhase.MAP  # Ensure phase is correct
 
-                    if node.room_type == RoomType.COMBAT or node.room_type == RoomType.ELITE or node.room_type == RoomType.BOSS:
+                    if node.room_type in (RoomType.COMBAT, RoomType.ELITE, RoomType.BOSS):
                         self._show_combat()
                     elif node.room_type == RoomType.EVENT:
                         self._show_event()
@@ -311,11 +670,12 @@ class GameApp:
                     elif node.room_type == RoomType.REST:
                         self._show_rest()
 
+    # ── Combat Screen ────────────────────────────────────────────────
+    # Framework Section 6, 11, 12 — THE core screen
+
     def _show_combat(self) -> None:
-        """Combat screen."""
         self.current_screen = "combat"
         state = self.engine.state
-
         if not state:
             return
 
@@ -339,101 +699,171 @@ class GameApp:
             cs = combat.state
             self.console.clear()
 
-            lines = []
+            # ── Top: Floor header ──
+            floor_name = t(f"floor.{state.current_floor}.name", self.lang)
+            header = Panel(
+                f"⚔ {floor_name}    {t('combat.your_turn', self.lang)} · Turn {cs.turn}",
+                border_style=COLOR_NODE[RoomType.COMBAT],
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
 
-            # Enemy display
-            lines.append("  ╔══ ENEMIES ══╗")
+            # ── Mid: Enemies (framework Section 12: left, with intent) ──
+            enemy_lines = []
             alive_enemies = [e for e in cs.enemies if e.alive]
             for i, enemy in enumerate(alive_enemies):
+                intent_idx = [j for j, e in enumerate(cs.enemies) if e.alive][i]
+                intent = combat._enemy_intents[intent_idx] if intent_idx < len(combat._enemy_intents) else None
+                if intent:
+                    intent_str = _intent_display(
+                        intent.type.value,
+                        value=intent.value,
+                        status=getattr(intent, 'status', ''),
+                        status_value=getattr(intent, 'status_value', 0),
+                        lang=self.lang,
+                    )
+                else:
+                    intent_str = "? ?"
+
                 enemy_name = t(enemy.name, self.lang) if t(enemy.name, self.lang) != enemy.name else enemy.name
-                intent_str = combat.get_enemy_intent_display(i)
-                hp_bar = _simple_hp(enemy.hp, enemy.max_hp)
-                target_marker = "► " if i == target_index else "  "
-                lines.append(f"  {target_marker}{intent_str} {enemy_name} {hp_bar} {enemy.hp}/{enemy.max_hp}")
+                hp_bar_str = _hp_bar(enemy.hp, enemy.max_hp, 12)
+                target_marker = "►" if i == target_index else " "
+
+                enemy_lines.append(
+                    f"{target_marker} {intent_str:<26} │ {enemy_name}"
+                )
+                enemy_lines.append(
+                    f"  HP: {hp_bar_str} {enemy.hp}/{enemy.max_hp}"
+                )
                 if enemy.block > 0:
-                    lines.append(f"     🛡 Block: {enemy.block}")
+                    enemy_lines.append(f"  🛡 Block: {enemy.block}")
+                status_str = _status_icons(enemy)
+                if status_str:
+                    enemy_lines.append(f"  {status_str}")
 
-            lines.append("")
+            enemy_panel = Panel(
+                "\n".join(enemy_lines) if enemy_lines else t("combat.victory_title", self.lang),
+                title=t("combat.enemy_intent_hint", self.lang),
+                border_style=COLOR_ATTACK,
+                box=box.ROUNDED,
+            )
+            self.console.print(enemy_panel)
 
-            # Player status
-            lines.append(f"  ╔══ PLAYER ══╗")
-            hp_bar = _simple_hp(cs.player.hp, cs.player.max_hp)
-            lines.append(f"  ⚡ {cs.energy}/{cs.max_energy}  ❤ {hp_bar} {cs.player.hp}/{cs.player.max_hp}")
+            # ── Mid: Player status ──
+            hp_bar_str = _hp_bar(cs.player.hp, cs.player.max_hp, 14)
+            hp_style = _hp_color(cs.player.hp, cs.player.max_hp)
+
+            player_text = Text()
+            player_text.append(f"⚡ {t('combat.energy', self.lang)}: {cs.energy}/{cs.max_energy}  ", style=COLOR_ENERGY)
+            player_text.append("❤ ", style=hp_style)
+            player_text.append(f"{hp_bar_str} {cs.player.hp}/{cs.player.max_hp}", style=hp_style)
             if cs.player.block > 0:
-                lines.append(f"  🛡 Block: {cs.player.block}")
-
-            # Status effects
-            status_str = _status_line(cs.player)
+                player_text.append(f"\n🛡 {t('combat.block', self.lang)}: {cs.player.block}", style=COLOR_BLOCK)
+            status_str = _status_icons(cs.player)
             if status_str:
-                lines.append(f"  {status_str}")
+                player_text.append(f"\n{status_str}")
+            pile_info = t("combat.pile_info", self.lang).format(
+                len(cs.draw_pile), len(cs.discard_pile), len(cs.exhaust_pile)
+            )
+            player_text.append(f"\n📦 {pile_info}", style=COLOR_DIM)
 
-            lines.append(f"  📦 Draw: {len(cs.draw_pile)} | ♻ Discard: {len(cs.discard_pile)} | 🔥 Exhaust: {len(cs.exhaust_pile)}")
-            lines.append("")
+            player_panel = Panel(
+                player_text,
+                title=t("combat.your_status", self.lang),
+                border_style=COLOR_SKILL,
+                box=box.ROUNDED,
+            )
+            self.console.print(player_panel)
 
-            # Hand
-            lines.append(f"  ╔══ {t('combat.hand', self.lang)} [{cs.turn}] ══╗")
+            # ── Bottom: Hand cards (framework Section 12) ──
             if cs.hand:
-                for i, card in enumerate(cs.hand):
-                    cursor = "► " if i == selected_card else "  "
-                    cost = card.get_cost()
-                    name = _get_card_name(card)
-                    playable = cost <= cs.energy
-                    marker = "" if playable else " [NO ENERGY]"
-                    lines.append(f"  {cursor}[{i+1}] {cost}⚡ {name}{marker}")
+                hand_render = render_hand_horizontal(cs.hand, self.lang, selected_card, cs.energy)
+                hand_panel = Panel(
+                    Align.center(hand_render) if hand_render else "",
+                    title=f"🃏 {t('combat.hand', self.lang)} [{len(cs.hand)}]",
+                    border_style=COLOR_HIGHLIGHT if selected_card < len(cs.hand) else COLOR_DIM,
+                    box=box.ROUNDED,
+                )
             else:
-                lines.append("  (空手)")
+                hand_panel = Panel(
+                    Align.center(Text(t("combat.empty_hand", self.lang), style=COLOR_DIM)),
+                    title=f"🃏 {t('combat.hand', self.lang)}",
+                    border_style=COLOR_DIM,
+                    box=box.ROUNDED,
+                )
+            self.console.print(hand_panel)
 
-            lines.append("")
-            lines.append(f"  [1-9] 选牌 | E {t('combat.end_turn', self.lang)} | D 牌组 | R 重抽")
+            # ── Controls bar ──
+            controls = Text(t("combat.controls", self.lang), style=COLOR_DIM)
+            self.console.print(Align.center(controls))
 
-            # Combat log
+            # ── Combat log ──
             if cs.combat_log:
-                lines.append(f"  ---")
+                log_text = Text()
                 for log_line in cs.combat_log[-3:]:
-                    lines.append(f"  {log_line}")
+                    log_text.append(f"  > {log_line}\n", style=COLOR_DIM)
+                self.console.print(Panel(log_text, title="Log", border_style=COLOR_DIM, box=box.MINIMAL, padding=(0, 1)))
 
-            for line in lines:
-                self.console.print(line)
-
-            # Input
+            # ── Input ──
             key = self.key_handler.get_key()
 
             if key == 'e':
-                combat.end_player_turn()
+                # Anti-fool: confirm if cards remain
+                if cs.hand and cs.phase.value == "player_turn":
+                    if self._confirm(t("confirm.end_turn", self.lang), default_no=True):
+                        combat.end_player_turn()
+                        selected_card = 0
+                else:
+                    combat.end_player_turn()
+                    selected_card = 0
             elif key in ('r',):
-                combat.use_snake_skin()
+                if not combat.use_snake_skin():
+                    self._show_message(t("hint.need_relic", self.lang))
             elif key in ('d',):
-                # Show deck view (simplified)
-                pass
+                self._show_deck_view()
+            elif key == 'tab':
+                alive_indicies = [i for i, e in enumerate(cs.enemies) if e.alive]
+                if alive_indicies:
+                    current_pos = alive_indicies.index(target_index) if target_index in alive_indicies else 0
+                    new_pos = (current_pos + 1) % len(alive_indicies)
+                    target_index = alive_indicies[new_pos]
             elif key in ('up', 'left'):
-                selected_card = (selected_card - 1) % max(1, len(cs.hand))
+                if cs.hand:
+                    selected_card = (selected_card - 1) % len(cs.hand)
             elif key in ('down', 'right'):
-                selected_card = (selected_card + 1) % max(1, len(cs.hand))
+                if cs.hand:
+                    selected_card = (selected_card + 1) % len(cs.hand)
             elif key == 'enter':
                 if cs.hand and selected_card < len(cs.hand):
-                    combat.play_card(selected_card, target_index)
-                    selected_card = min(selected_card, len(cs.hand) - 1) if cs.hand else 0
-            elif key == 'tab':
-                # Switch target
-                target_index = (target_index + 1) % max(1, len(cs.enemies))
+                    card = cs.hand[selected_card]
+                    if card.get_cost() <= cs.energy:
+                        combat.play_card(selected_card, target_index)
+                        if cs.hand:
+                            selected_card = min(selected_card, len(cs.hand) - 1)
+                        else:
+                            selected_card = 0
             elif key in (str(i) for i in range(1, 10)):
                 idx = int(key) - 1
                 if idx < len(cs.hand):
-                    combat.play_card(idx, target_index)
-                    selected_card = min(selected_card, len(cs.hand) - 1) if cs.hand else 0
+                    card = cs.hand[idx]
+                    if card.get_cost() <= cs.energy:
+                        combat.play_card(idx, target_index)
+                        if cs.hand:
+                            selected_card = min(selected_card, len(cs.hand) - 1)
+                        else:
+                            selected_card = 0
 
-        # Combat ended
+        # ── Combat ended ──
         if combat.state.won:
             state.hp = combat.state.player.hp
             state.hp = min(state.hp, state.max_hp)
 
-            # Floor 3 boss defeated = victory
-            was_boss = self.engine.state.floor_map.nodes[self.engine.state.floor_map.current_node].room_type == RoomType.BOSS
-            state.bosses_defeated += 1 if was_boss else 0
+            node = self.engine.state.floor_map.nodes.get(self.engine.state.floor_map.current_node)
+            was_boss = node and node.room_type == RoomType.BOSS
+            if was_boss:
+                state.bosses_defeated += 1
             state.encounters_completed += 1
 
-            # Generate rewards
-            self.engine.state = state  # Sync back
             self._show_reward(was_boss)
 
             if was_boss:
@@ -442,177 +872,211 @@ class GameApp:
                     self._show_game_over(won=True)
                     return
                 else:
+                    self.engine.state.phase = RunPhase.MAP
                     self._show_map()
                     return
+            self.engine.state.phase = RunPhase.MAP
             self._show_map()
         else:
-            # Check phoenix feather
             if combat.try_phoenix_revive():
-                # Continue combat
-                pass
+                self._show_combat()  # Re-enter combat after revive
             else:
                 state.hp = 0
                 self._show_game_over(won=False)
 
-    def _show_reward(self, is_boss: bool = False) -> None:
-        """Reward screen after combat."""
-        self.current_screen = "reward"
-        state = self.engine.state
-
-        # Generate rewards
-        card_rewards = self.engine.generate_card_rewards(3)
-        relic_reward = self.engine.generate_boss_relic() if is_boss else self.engine.generate_relic_reward()
-        gold_reward = random.randint(15, 30) if not is_boss else random.randint(40, 60)
-        self.engine.add_gold(gold_reward)
-
-        selected = 0
-
-        while self.running:
-            self.console.clear()
-            lines = []
-            lines.append(f"\n  ╔══ {t('combat.rewards', self.lang)} ══╗")
-            lines.append(f"  💰 +{gold_reward} {t('misc.gold', self.lang)} (Total: {state.gold})")
-            lines.append("")
-
-            if card_rewards:
-                lines.append(f"  {t('reward.card_select', self.lang)}:")
-                for i, card in enumerate(card_rewards):
-                    cursor = "► " if i == selected else "  "
-                    name = _get_card_name(card)
-                    lines.append(f"  {cursor}{name} ({card.cost}⚡)")
-                lines.append("")
-
-            if relic_reward:
-                relic_name = t(relic_reward.name_key, self.lang)
-                lines.append(f"  🏺 {t('reward.relic_get', self.lang)}: {relic_name}")
-
-            lines.append(f"  Enter {t('menu.select', self.lang)} | S {t('combat.skip', self.lang)}")
-
-            for line in lines:
-                self.console.print(line)
-
-            key = self.key_handler.get_key()
-            if key == 'enter' and card_rewards:
-                self.engine.add_card_to_deck(card_rewards[selected])
-                break
-            elif key in ('s',):
-                # Skip card - Broken Crown check
-                for relic in state.relics:
-                    if relic.on_skip_reward:
-                        self.engine.add_gold(relic.on_skip_reward.get("value", 20))
-                break
-            elif key == 'up':
-                selected = (selected - 1) % len(card_rewards) if card_rewards else 0
-            elif key == 'down':
-                selected = (selected + 1) % len(card_rewards) if card_rewards else 0
-
-        if relic_reward:
-            state.relics.append(relic_reward)
+    # ── Event Screen ─────────────────────────────────────────────────
+    # Framework Section 13: ASCII art + typewriter narrative + choices
 
     def _show_event(self) -> None:
-        """Event screen."""
         event = self.engine.get_random_event()
         if not event:
             self._show_map()
             return
 
-        self.current_screen = "event"
+        from abyssal.content.event_runner import EventRunner
+        runner = EventRunner(self.engine)
+        event_data = runner.run_event(event)
+
+        if event_data.get("blocked"):
+            self._show_message(t("event.blocked", self.lang))
+            self._show_map()
+            return
+
+        choices = event_data.get("choices", event.choices)
         selected = 0
 
         while self.running:
             self.console.clear()
-            lines = []
 
             event_name = t(event.name_key, self.lang)
             event_desc = t(event.description_key, self.lang)
 
-            lines.append(f"\n  ╔══ {t('event.encounter', self.lang)}: {event_name} ══╗")
-            lines.append(f"  {event_desc}")
-            lines.append("")
+            # Header
+            header = Panel(
+                Text(event_name, style=Style(bold=True, color="#44DDDD")),
+                border_style=Style(color="#44DDDD"),
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
 
+            # ASCII art if available
             if event.ascii_art:
-                lines.append(event.ascii_art)
-                lines.append("")
+                art_panel = Panel(event.ascii_art, border_style=COLOR_DIM, box=box.MINIMAL)
+                self.console.print(art_panel)
 
-            for i, choice in enumerate(event.choices):
-                cursor = "► " if i == selected else "  "
+            # Description
+            desc_panel = Panel(
+                Text(event_desc, style=COLOR_BRIGHT),
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+            )
+            self.console.print(desc_panel)
+
+            # Choices
+            choice_lines = []
+            for i, choice in enumerate(choices):
+                cursor = "►" if i == selected else " "
                 choice_text = t(choice.text_key, self.lang)
-                lines.append(f"  {cursor}{i+1}. {choice_text}")
+                line = f" {cursor} {i + 1}. {choice_text}"
 
-            lines.append(f"  Enter {t('event.choose', self.lang)}")
+                # Show requirements (framework Section 13: gold requirements etc.)
+                requires = choice.requires if hasattr(choice, 'requires') else {}
+                if requires:
+                    if "gold" in requires and self.engine.state.gold < requires["gold"]:
+                        line += f"  [{t('event.requirement_gold', self.lang).format(requires['gold'])}]"
 
-            for line in lines:
-                self.console.print(line)
+                # Show success chance
+                if hasattr(choice, 'chance') and choice.chance < 1.0:
+                    line += f"  [{t('event.chance', self.lang)}: {int(choice.chance * 100)}%]"
+
+                choice_lines.append(line)
+
+            choices_panel = Panel(
+                "\n".join(choice_lines) if choice_lines else t("event.continue_hint", self.lang),
+                title=t("event.choose", self.lang),
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+            )
+            self.console.print(choices_panel)
+
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
-            if key == 'enter' and event.choices:
-                choice = event.choices[selected]
-                # Apply effects (simplified)
-                for effect in choice.effects:
-                    etype = effect.get("type", "")
-                    if etype == "heal_percent":
-                        heal_amt = int(self.engine.state.max_hp * effect.get("value", 0.25))
-                        self.engine.state.hp = min(self.engine.state.max_hp, self.engine.state.hp + heal_amt)
-                    elif etype == "add_random_relic":
-                        relic = self.engine.generate_relic_reward()
-                        if relic:
-                            self.engine.state.relics.append(relic)
-                    elif etype == "remove_gold":
-                        self.engine.spend_gold(effect.get("value", 0))
+            if key == 'enter' and choices:
+                choice = choices[selected]
+                result = runner.execute_choice(event, choice)
+
+                # Show result
+                self.console.clear()
+                result_text = t(choice.result_text_key, self.lang) if hasattr(choice, 'result_text_key') else ""
+                result_panel = Panel(
+                    Text(result_text, style=COLOR_BRIGHT),
+                    title=t("event.encounter", self.lang),
+                    border_style=COLOR_DIM,
+                    box=box.ROUNDED,
+                )
+                self.console.print(result_panel)
+
+                # Show effects
+                if result.get("effects"):
+                    for eff in result["effects"]:
+                        self.console.print(f"  → {eff}", style=COLOR_DIM)
+
+                self.console.print(Align.center(Text(
+                    t("event.continue_hint", self.lang), style=COLOR_DIM
+                )))
+
+                key2 = self.key_handler.get_key()
                 break
             elif key == 'up':
-                selected = (selected - 1) % len(event.choices) if event.choices else 0
+                selected = (selected - 1) % max(1, len(choices))
             elif key == 'down':
-                selected = (selected + 1) % len(event.choices) if event.choices else 0
+                selected = (selected + 1) % max(1, len(choices))
+            elif key in ('escape',):
+                break
 
+        self.engine.state.phase = RunPhase.MAP
         self._show_map()
 
-    def _show_shop(self) -> None:
-        """Shop screen."""
-        self.current_screen = "shop"
+    # ── Shop Screen ──────────────────────────────────────────────────
+    # Framework Section 14: cards, relics, card removal with escalating cost
 
-        # Generate shop inventory
+    def _show_shop(self) -> None:
+        self.current_screen = "shop"
+        state = self.engine.state
+
         cards_for_sale = self.engine.generate_card_rewards(3)
         relics_for_sale = [self.engine.generate_relic_reward() for _ in range(2) if random.random() < 0.7]
-
+        relics_for_sale = [r for r in relics_for_sale if r]
         card_prices = [50, 75, 100]
         relic_prices = [100, 150]
         remove_cost = self.engine.get_remove_cost()
 
+        items = []
+        for i, c in enumerate(cards_for_sale):
+            items.append(("card", c, card_prices[min(i, len(card_prices) - 1)]))
+        for i, r in enumerate(relics_for_sale):
+            items.append(("relic", r, relic_prices[min(i, len(relic_prices) - 1)]))
+        items.append(("remove", None, remove_cost))
+        items.append(("leave", None, 0))
+
         selected = 0
-        items = [
-            *[("card", c, card_prices[min(i, len(card_prices)-1)]) for i, c in enumerate(cards_for_sale)],
-            *[("relic", r, relic_prices[min(i, len(relic_prices)-1)]) for i, r in enumerate(relics_for_sale) if r],
-            ("remove", None, remove_cost),
-            ("leave", None, 0),
-        ]
 
         while self.running:
             self.console.clear()
-            state = self.engine.state
-            lines = []
-            lines.append(f"\n  ╔══ {t('shop.title', self.lang)} ══╗")
-            lines.append(f"  💰 {t('shop.gold', self.lang)}: {state.gold}")
-            lines.append("")
 
+            # Header
+            gold_text = Text(f"💰 {state.gold}", style=COLOR_GOLD)
+            header = Panel(
+                gold_text,
+                title=f"💰 {t('shop.title', self.lang)}",
+                border_style=COLOR_GOLD,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
+
+            # Items
+            item_lines = []
             for i, item in enumerate(items):
-                cursor = "► " if i == selected else "  "
+                cursor = "►" if i == selected else " "
                 itype, obj, price = item
+                can_afford = state.gold >= price
+
                 if itype == "card":
-                    name = _get_card_name(obj)
-                    lines.append(f"  {cursor}🃏 {name} - {price}💰")
+                    name = _card_name(obj, self.lang)
+                    ctype = t(f"card.type.{obj.card_type.value}", self.lang)
+                    price_color = COLOR_GREEN if can_afford else COLOR_HP_RED
+                    line = f" {cursor} 🃏 {name} ({ctype}) — {price}💰"
                 elif itype == "relic":
                     name = t(obj.name_key, self.lang)
-                    lines.append(f"  {cursor}🏺 {name} - {price}💰")
+                    price_color = COLOR_GREEN if can_afford else COLOR_HP_RED
+                    line = f" {cursor} 🏺 {name} — {price}💰"
                 elif itype == "remove":
-                    lines.append(f"  {cursor}🗑 {t('shop.remove', self.lang)} - {price}💰")
+                    price_color = COLOR_GREEN if can_afford else COLOR_HP_RED
+                    line = f" {cursor} 🗑 {t('shop.remove', self.lang)} — {price}💰"
                 elif itype == "leave":
-                    lines.append(f"  {cursor}🚪 {t('shop.leave', self.lang)}")
+                    line = f" {cursor} 🚪 {t('shop.leave', self.lang)}"
 
-            lines.append(f"  Enter {t('shop.buy', self.lang)} | ESC {t('shop.leave', self.lang)}")
+                if not can_afford and itype != "leave":
+                    line += f"  [{t('shop.no_gold', self.lang)}]"
+                item_lines.append(line)
 
-            for line in lines:
-                self.console.print(line)
+            items_panel = Panel(
+                "\n".join(item_lines),
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+            )
+            self.console.print(items_panel)
+
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('shop.buy', self.lang)} | ESC {t('shop.leave', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
             if key == 'up':
@@ -623,43 +1087,132 @@ class GameApp:
                 itype, obj, price = items[selected]
                 if itype == "leave":
                     break
-                if self.engine.spend_gold(price):
+                if itype == "remove":
+                    # Card removal — show deck for selection
+                    removed = self._show_card_removal(price)
+                    if removed:
+                        # Remove item from list since removal cost increases
+                        items[selected] = ("remove", None, self.engine.get_remove_cost())
+                elif self.engine.spend_gold(price):
                     if itype == "card":
                         self.engine.add_card_to_deck(obj)
+                        items[selected] = ("sold", None, 0)
                     elif itype == "relic":
                         self.engine.state.relics.append(obj)
-                    elif itype == "remove":
-                        # TODO: Show deck for selection
-                        pass
+                        items[selected] = ("sold", None, 0)
             elif key in ('escape',):
                 break
 
+        self.engine.state.phase = RunPhase.MAP
         self._show_map()
 
-    def _show_rest(self) -> None:
-        """Rest site screen."""
-        self.current_screen = "rest"
-        selected = 0
-        options = ["heal", "upgrade"]
+    def _show_card_removal(self, price: int) -> bool:
+        """Show deck for card removal selection. Returns True if a card was removed."""
         state = self.engine.state
+        if not state or not state.deck:
+            return False
+
+        scroll = 0
+        selected = 0
+        while self.running:
+            self.console.clear()
+
+            header = Panel(
+                f"{t('shop.select_remove', self.lang)} — {price}💰 ({t('shop.gold', self.lang)}: {state.gold})",
+                border_style=COLOR_HP_RED,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
+
+            cards_sorted = sorted(state.deck, key=lambda c: (c.card_type.value, c.cost))
+            for i, card in enumerate(cards_sorted[scroll:scroll + 15]):
+                cursor = "►" if (i + scroll) == selected else " "
+                name = _card_name(card, self.lang)
+                ctype = t(f"card.type.{card.card_type.value}", self.lang)
+                self.console.print(f" {cursor} [{card.cost}⚡] {name} ({ctype})")
+
+            self.console.print("")
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | ESC {t('menu.back', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
+
+            key = self.key_handler.get_key()
+            if key == 'up':
+                selected = max(0, selected - 1)
+                if selected < scroll:
+                    scroll = selected
+            elif key == 'down':
+                selected = min(len(cards_sorted) - 1, selected + 1)
+                if selected >= scroll + 15:
+                    scroll = min(selected - 14, len(cards_sorted) - 15)
+            elif key == 'enter':
+                if selected < len(cards_sorted):
+                    if self._confirm(
+                        f"{t('confirm.remove_card', self.lang)}\n\n{_card_name(cards_sorted[selected], self.lang)}",
+                        default_no=True,
+                    ):
+                        if self.engine.spend_gold(price):
+                            # Find and remove the card
+                            target = cards_sorted[selected]
+                            for i, c in enumerate(state.deck):
+                                if c is target:
+                                    self.engine.remove_card_from_deck(i)
+                                    return True
+                return False
+            elif key in ('escape',):
+                return False
+        return False
+
+    # ── Rest Screen ──────────────────────────────────────────────────
+    # Framework: heal 30% OR upgrade a selected card
+
+    def _show_rest(self) -> None:
+        self.current_screen = "rest"
+        state = self.engine.state
+        options = ["heal", "upgrade"]
+        selected = 0
 
         while self.running:
             self.console.clear()
-            lines = []
-            lines.append(f"\n  ╔══ {t('rest.title', self.lang)} ══╗")
-            lines.append(f"  HP: {state.hp}/{state.max_hp}")
-            lines.append("")
+
+            hp_bar_str = _hp_bar(state.hp, state.max_hp, 14)
+            header = Panel(
+                f"❤ {hp_bar_str} {state.hp}/{state.max_hp}",
+                title=f"🔥 {t('rest.title', self.lang)}",
+                border_style=COLOR_POWER,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
+            self.console.print("")
 
             for i, opt in enumerate(options):
-                cursor = "► " if i == selected else "  "
+                cursor = "►" if i == selected else " "
                 if opt == "heal":
-                    lines.append(f"  {cursor}💚 {t('rest.heal', self.lang)} - {t('rest.heal_desc', self.lang)}")
+                    heal_amt = int(state.max_hp * 0.3)
+                    disabled = state.hp >= state.max_hp
+                    hint = f" [{t('hint.hp_full', self.lang)}]" if disabled else ""
+                    self.console.print(
+                        f" {cursor} 💚 {t('rest.heal', self.lang)} — {t('rest.heal_desc', self.lang)} (+{heal_amt} HP){hint}"
+                    )
                 elif opt == "upgrade":
-                    lines.append(f"  {cursor}🔨 {t('rest.upgrade', self.lang)} - {t('rest.upgrade_desc', self.lang)}")
-            lines.append(f"  Enter {t('menu.select', self.lang)}")
+                    upgradable = sum(1 for c in state.deck if not c.upgraded and c.upgraded_effects)
+                    if upgradable == 0:
+                        self.console.print(
+                            f" {cursor} 🔨 {t('rest.upgrade', self.lang)} — [{t('hint.no_upgradable', self.lang)}]"
+                        )
+                    else:
+                        self.console.print(
+                            f" {cursor} 🔨 {t('rest.upgrade', self.lang)} — {t('rest.upgrade_desc', self.lang)} ({upgradable} {t('rest.upgrade_done', self.lang)})"
+                        )
 
-            for line in lines:
-                self.console.print(line)
+            self.console.print("")
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | ESC {t('menu.back', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
             if key == 'up':
@@ -668,47 +1221,230 @@ class GameApp:
                 selected = (selected + 1) % len(options)
             elif key == 'enter':
                 if selected == 0:
-                    if state.hp < state.max_hp:
-                        healed = self.engine.rest_heal()
-                        self.message = t('rest.heal_done', self.lang)
-                    else:
-                        self.message = t('rest.max_hp', self.lang)
+                    if state.hp >= state.max_hp:
+                        self._show_message(t("hint.hp_full", self.lang))
+                        continue
+                    healed = self.engine.rest_heal()
+                    self._show_message(t("rest.heal_done", self.lang))
+                    break
                 elif selected == 1:
-                    # Simplified: upgrade first upgradable card
-                    for i, card in enumerate(state.deck):
-                        if not card.upgraded and card.upgraded_effects:
-                            self.engine.rest_upgrade(i)
-                            break
-                break
+                    upgradable = [i for i, c in enumerate(state.deck) if not c.upgraded and c.upgraded_effects]
+                    if not upgradable:
+                        self._show_message(t("hint.no_upgradable", self.lang))
+                        continue
+                    # Show selectable upgrade cards
+                    self._show_upgrade_select(upgradable)
+                    break
             elif key in ('escape',):
                 break
 
+        self.engine.state.phase = RunPhase.MAP
         self._show_map()
 
+    def _show_upgrade_select(self, upgradable_indices: list[int]) -> None:
+        """Show selectable cards for upgrade at rest site."""
+        state = self.engine.state
+        selected = 0
+
+        while self.running:
+            self.console.clear()
+            header = Panel(
+                t("rest.select_card_upgrade", self.lang),
+                border_style=COLOR_POWER,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
+            self.console.print("")
+
+            for i, deck_idx in enumerate(upgradable_indices):
+                card = state.deck[deck_idx]
+                cursor = "►" if i == selected else " "
+                name = _card_name(card, self.lang)
+                # Show before/after
+                current_effects = card.get_effects()
+                current_desc = ", ".join(
+                    f"{e.type}:{e.value}" if hasattr(e, 'type') else e.get('type', '')
+                    for e in current_effects[:2]
+                )
+                upgraded_effects = card.upgraded_effects
+                upgraded_desc = ", ".join(
+                    f"{e.get('type', '')}:{e.get('value', '')}"
+                    for e in upgraded_effects[:2]
+                )
+                self.console.print(
+                    f" {cursor} [{card.cost}⚡] {name}  |  {current_desc}  →  {upgraded_desc}"
+                )
+
+            self.console.print("")
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | ESC {t('menu.back', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
+
+            key = self.key_handler.get_key()
+            if key == 'up':
+                selected = (selected - 1) % len(upgradable_indices)
+            elif key == 'down':
+                selected = (selected + 1) % len(upgradable_indices)
+            elif key == 'enter':
+                self.engine.rest_upgrade(upgradable_indices[selected])
+                self._show_message(t("rest.upgrade_done", self.lang))
+                return
+            elif key in ('escape',):
+                return
+
+    # ── Reward Screen ────────────────────────────────────────────────
+    # Framework: 3 card choices with card widget rendering
+
+    def _show_reward(self, is_boss: bool = False) -> None:
+        self.current_screen = "reward"
+        state = self.engine.state
+
+        card_rewards = self.engine.generate_card_rewards(3)
+        relic_reward = self.engine.generate_boss_relic() if is_boss else self.engine.generate_relic_reward()
+        gold_reward = random.randint(15, 30) if not is_boss else random.randint(40, 60)
+        self.engine.add_gold(gold_reward)
+
+        selected = 0
+
+        while self.running:
+            self.console.clear()
+
+            # Header
+            header = Panel(
+                Text(f"💰 +{gold_reward} {t('misc.gold', self.lang)}  |  {t('reward.card_count', self.lang).format(len(state.deck))}", style=COLOR_GOLD),
+                title=f"🎁 {t('combat.rewards', self.lang)}",
+                border_style=COLOR_GOLD,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
+
+            # Relic display
+            if relic_reward:
+                relic_name = t(relic_reward.name_key, self.lang)
+                relic_desc = t(f"{relic_reward.name_key}.desc", self.lang)
+                self.console.print(Panel(
+                    f"🏺 {relic_name}\n   {relic_desc}",
+                    title=t("reward.relic_get", self.lang),
+                    border_style=COLOR_LEGENDARY,
+                    box=box.ROUNDED,
+                ))
+
+            # Cards — render side by side
+            if card_rewards:
+                card_renders = []
+                for i, card in enumerate(card_rewards):
+                    cr = render_card_mini(card, self.lang, selected=(i == selected), playable=True)
+                    card_renders.append(cr.split("\n"))
+
+                # Combine horizontally
+                combined = []
+                for row in range(7):
+                    row_str = "    "
+                    for cr in card_renders:
+                        if row < len(cr):
+                            row_str += cr[row] + "   "
+                    combined.append(row_str)
+
+                self.console.print("")
+                for line in combined:
+                    self.console.print(Align.center(line))
+
+                self.console.print("")
+
+            controls = Text(
+                f"←→ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | {t('reward.skip_hint', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
+
+            key = self.key_handler.get_key()
+            if key == 'left':
+                selected = (selected - 1) % max(1, len(card_rewards))
+            elif key == 'right':
+                selected = (selected + 1) % max(1, len(card_rewards))
+            elif key == 'up':
+                selected = (selected - 1) % max(1, len(card_rewards))
+            elif key == 'down':
+                selected = (selected + 1) % max(1, len(card_rewards))
+            elif key == 'enter' and card_rewards:
+                self.engine.add_card_to_deck(card_rewards[selected])
+                break
+            elif key in ('s',):
+                for relic in state.relics:
+                    if hasattr(relic, 'on_skip_reward') and relic.on_skip_reward:
+                        self.engine.add_gold(relic.on_skip_reward.get("value", 20))
+                break
+
+        if relic_reward:
+            state.relics.append(relic_reward)
+
+    # ── Deck View ────────────────────────────────────────────────────
+    # Framework: categorized, colored by card type
+
     def _show_deck_view(self) -> None:
-        """Deck view screen."""
         state = self.engine.state
         if not state:
             return
 
         scroll = 0
+        category = 0  # 0=All, 1=Attack, 2=Skill, 3=Power, 4=Curse
+        categories = [
+            ("all", None),
+            ("deck.category_attack", CardType.ATTACK),
+            ("deck.category_skill", CardType.SKILL),
+            ("deck.category_power", CardType.POWER),
+            ("deck.category_curse", CardType.CURSE),
+        ]
+
         while self.running:
             self.console.clear()
-            lines = []
-            lines.append(f"\n  ╔══ {t('deck.title', self.lang)}: {len(state.deck)} {t('deck.count', self.lang).format(len(state.deck))} ══╗")
-            lines.append("")
 
-            sorted_deck = sorted(state.deck, key=lambda c: (c.card_type.value, c.cost))
+            # Filter cards
+            cat_key, cat_type = categories[category]
+            if cat_type:
+                filtered = [c for c in state.deck if c.card_type == cat_type]
+            else:
+                filtered = sorted(state.deck, key=lambda c: (c.card_type.value, c.cost))
 
-            for i, card in enumerate(sorted_deck[scroll:scroll+20]):
-                name = _get_card_name(card)
-                type_str = t(f"card.type.{card.card_type.value}", self.lang)
-                lines.append(f"  [{card.cost}⚡] {name} ({type_str})")
+            cat_name = t(cat_key, self.lang) if cat_key != "all" else t("deck.title", self.lang)
 
-            lines.append(f"  ↑↓ Scroll | ESC {t('menu.back', self.lang)}")
+            # Header
+            header = Panel(
+                f"{len(filtered)} {t('deck.count', self.lang).format(len(filtered))}",
+                title=f"🃏 {cat_name}",
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
 
-            for line in lines:
-                self.console.print(line)
+            # Cards
+            visible = filtered[scroll:scroll + 18]
+            for i, card in enumerate(visible):
+                actual_idx = scroll + i
+                name = _card_name(card, self.lang)
+                ctype = t(f"card.type.{card.card_type.value}", self.lang)
+                color = CARD_TYPE_COLOR.get(card.card_type.value, COLOR_BRIGHT)
+                self.console.print(
+                    f"  [{card.cost}⚡] {name}  [{ctype}]",
+                    style=color,
+                )
+
+            if not visible:
+                self.console.print(Align.center(Text(t("deck.empty", self.lang), style=COLOR_DIM)))
+
+            self.console.print("")
+
+            # Category tabs
+            cat_line = "  ".join(
+                f"{'►' if i == category else ' '} {t(c[0], self.lang)}" if c[0] != "all" else f"{'►' if i == category else ' '} ALL"
+                for i, c in enumerate(categories)
+            )
+            self.console.print(Align.center(Text(cat_line, style=COLOR_DIM)))
+
+            controls = Text(t("deck.controls", self.lang), style=COLOR_DIM)
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
             if key in ('escape', 'd'):
@@ -716,38 +1452,89 @@ class GameApp:
             elif key == 'up':
                 scroll = max(0, scroll - 1)
             elif key == 'down':
-                scroll = min(max(0, len(state.deck) - 20), scroll + 1)
+                scroll = min(max(0, len(filtered) - 18), scroll + 1)
+            elif key == 'left':
+                category = (category - 1) % len(categories)
+                scroll = 0
+            elif key == 'right':
+                category = (category + 1) % len(categories)
+                scroll = 0
+
+    # ── Game Over Screen ─────────────────────────────────────────────
+    # Framework Section 9.3: ending narrative + stats + achievements
 
     def _show_game_over(self, won: bool = False) -> None:
-        """Game over screen."""
         state = self.engine.state
         if not state:
             return
 
         memory = self.engine.calculate_memory()
+        ending = self.engine.determine_ending()
+        achievements = self.engine.check_achievements()
 
         while self.running:
             self.console.clear()
-            lines = []
 
+            # Victory/Death banner
             if won:
-                lines.append(f"\n  ╔══ {t('gameover.victory', self.lang)} ══╗")
+                banner = Panel(
+                    Align.center(Text(t("gameover.victory", self.lang), style=Style(bold=True, color="#FFAA00"))),
+                    border_style=COLOR_LEGENDARY,
+                    box=box.DOUBLE,
+                )
             else:
-                lines.append(f"\n  ╔══ {t('gameover.death', self.lang)} ══╗")
+                banner = Panel(
+                    Align.center(Text(t("gameover.death", self.lang), style=Style(bold=True, color="#FF4444"))),
+                    border_style=COLOR_HP_RED,
+                    box=box.DOUBLE,
+                )
+            self.console.print(banner)
 
-            lines.append("")
-            lines.append(f"  {t('gameover.memory_earned', self.lang)}: {memory} 💎")
-            lines.append("")
-            lines.append(f"  {t('gameover.stats', self.lang)}:")
-            lines.append(f"  {t('gameover.floors_cleared', self.lang)}: {state.current_floor}")
-            lines.append(f"  {t('gameover.enemies_slain', self.lang)}: {state.encounters_completed}")
-            lines.append(f"  {t('gameover.cards_collected', self.lang)}: {state.cards_collected}")
-            lines.append(f"  {t('gameover.gold_total', self.lang)}: {state.gold_total}")
-            lines.append("")
-            lines.append(f"  Enter {t('gameover.return', self.lang)}")
+            # Ending
+            ending_name = t(f"ending.{ending}", self.lang)
+            ending_desc = t(f"ending.{ending}.desc", self.lang)
+            ending_panel = Panel(
+                f"{ending_desc}",
+                title=f"📜 {t('gameover.ending', self.lang)}: {ending_name}",
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+            )
+            self.console.print(ending_panel)
 
-            for line in lines:
-                self.console.print(line)
+            # Stats table
+            stats_table = Table(box=box.MINIMAL, border_style=COLOR_DIM)
+            stats_table.add_column(t("gameover.stats", self.lang), style=COLOR_DIM)
+            stats_table.add_column("", style=COLOR_BRIGHT)
+            stats_table.add_row(t("gameover.floors_cleared", self.lang), str(state.current_floor))
+            stats_table.add_row(t("gameover.enemies_slain", self.lang), str(state.encounters_completed))
+            stats_table.add_row(t("gameover.cards_collected", self.lang), str(state.cards_collected))
+            stats_table.add_row(t("gameover.gold_total", self.lang), str(state.gold_total))
+            stats_table.add_row(t("gameover.memory_earned", self.lang), f"💎 {memory}")
+            self.console.print(Align.center(stats_table))
+
+            # Achievements
+            if achievements:
+                achieve_text = Text()
+                for ach_id in achievements:
+                    achieve_name = t(f"achieve.{ach_id}", self.lang)
+                    achieve_desc = t(f"achieve.{ach_id}.desc", self.lang)
+                    achieve_text.append(f"🏆 {achieve_name}: {achieve_desc}\n", style=COLOR_LEGENDARY)
+                achieve_panel = Panel(
+                    achieve_text,
+                    title=t("gameover.achievements", self.lang),
+                    border_style=COLOR_LEGENDARY,
+                    box=box.ROUNDED,
+                )
+                self.console.print(achieve_panel)
+            else:
+                self.console.print(Align.center(Text(
+                    t("gameover.none", self.lang), style=COLOR_DIM
+                )))
+
+            self.console.print("")
+            self.console.print(Align.center(Text(
+                t("gameover.press_enter", self.lang), style=COLOR_HIGHLIGHT
+            )))
 
             key = self.key_handler.get_key()
             if key in ('enter', 'escape'):
@@ -755,28 +1542,36 @@ class GameApp:
                 self._show_main_menu()
                 return
 
+    # ── Settings ──────────────────────────────────────────────────────
+
     def _show_settings(self) -> None:
-        """Settings screen."""
         self.current_screen = "settings"
         selected = 0
         lang_options = ["zh", "en"]
 
         while self.running:
             self.console.clear()
-            lines = []
-            lines.append(f"\n  ╔══ {t('settings.title', self.lang)} ══╗")
-            lines.append("")
+
+            header = Panel(
+                Text(t("settings.title", self.lang), style=Style(bold=True)),
+                border_style=COLOR_DIM,
+                box=box.ROUNDED,
+            )
+            self.console.print(header)
+            self.console.print("")
 
             for i, lopt in enumerate(lang_options):
-                cursor = "► " if i == selected else "  "
+                cursor = "►" if i == selected else " "
                 label = t(f"menu.lang_{lopt}", self.lang)
-                active = " ◄" if lopt == self.lang else ""
-                lines.append(f"  {cursor}{t('settings.language', self.lang)}: {label}{active}")
+                active = " ◄ " + t("settings.language", self.lang) if lopt == self.lang else ""
+                self.console.print(f" {cursor} {t('settings.language', self.lang)}: {label}{active}")
 
-            lines.append(f"  Enter {t('menu.select', self.lang)} | ESC {t('menu.back', self.lang)}")
-
-            for line in lines:
-                self.console.print(line)
+            self.console.print("")
+            controls = Text(
+                f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | ESC {t('menu.back', self.lang)}",
+                style=COLOR_DIM,
+            )
+            self.console.print(Align.center(controls))
 
             key = self.key_handler.get_key()
             if key == 'up':
@@ -790,50 +1585,30 @@ class GameApp:
                 self._show_main_menu()
                 return
 
+    # ── Continue Game ─────────────────────────────────────────────────
+
     def _continue_game(self) -> None:
-        """Continue from a save."""
         from abyssal.save.save_manager import SaveManager
         sm = SaveManager()
         saves = sm.list_saves()
         if not saves:
-            self.message = t("save.no_save", self.lang)
+            self._show_message(t("save.no_save", self.lang))
             return
-        # Load latest save
+
         data = sm.load(saves[0]["slot"])
         if data:
             self.engine.from_dict(data)
             self.lang = self.engine.state.lang
+            self.engine.state.phase = RunPhase.MAP
             self._show_map()
 
 
-def _simple_hp(current: int, maximum: int, width: int = 10) -> str:
-    """Simple HP bar string."""
-    if maximum <= 0:
-        return "☠"
-    pct = max(0, min(1.0, current / maximum))
-    filled = int(width * pct)
-    return "█" * filled + "░" * (width - filled)
+# ── Entry Point ────────────────────────────────────────────────────────
+
+def main():
+    app = GameApp()
+    app.run()
 
 
-def _get_card_name(card) -> str:
-    from abyssal.i18n import t
-    name = t(card.name_key, "zh")
-    if card.upgraded:
-        name = "+" + name
-    return name
-
-
-def _status_line(combatant) -> str:
-    """Get a status effects line."""
-    icons = {
-        "vulnerable": "💔", "weak": "💜", "poison": "☠",
-        "charge": "⚡", "dodge": "💨", "regen": "💚",
-        "thorns": "🌿", "freeze": "❄", "bloodrage": "🩸",
-        "attack": "⚔", "defense": "🛡", "gale": "🌀",
-    }
-    parts = []
-    for name, status in combatant.statuses.items():
-        if status.stacks > 0:
-            icon = icons.get(name, "•")
-            parts.append(f"{icon}:{status.stacks}")
-    return " ".join(parts)
+if __name__ == "__main__":
+    main()
