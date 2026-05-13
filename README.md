@@ -1,6 +1,6 @@
 <div align="center">
 
-![version](https://img.shields.io/badge/version-0.4.0-8b5cf6?style=flat-square)
+![version](https://img.shields.io/badge/version-0.4.1-8b5cf6?style=flat-square)
 ![python](https://img.shields.io/badge/python-3.10+-3b82f6?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
 ![tests](https://img.shields.io/badge/tests-62_passed-22c55e?style=flat-square)
@@ -167,5 +167,5 @@ Full documentation is on the **[GitHub Wiki](https://github.com/Linrane/Abyssal-
 ---
 
 <p align="center">
-  <samp>v0.4.0 · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · <a href="https://github.com/Linrane/Abyssal-Codex/wiki">Wiki</a> · MIT License</samp>
+  <samp>v0.4.1 · <a href="https://github.com/Linrane/Abyssal-Codex/issues">Issues</a> · <a href="https://github.com/Linrane/Abyssal-Codex/wiki">Wiki</a> · MIT License</samp>
 </p>

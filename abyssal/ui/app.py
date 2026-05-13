@@ -419,7 +419,7 @@ class GameApp:
                 f"1-4 {t('menu.select', self.lang)} | L 中文/English | ESC {t('menu.quit', self.lang)}",
                 style=COLOR_DIM,
             )
-            version = Text("v0.3.0 · MIT License", style=COLOR_DIM)
+            version = Text("v0.4.1 · MIT License", style=COLOR_DIM)
 
             # Compose layout
             layout_lines = [
@@ -771,16 +771,18 @@ class GameApp:
         """Narrative transition screen between floors."""
         self.console.clear()
 
-        # Victory banner
-        lines = []
-        lines.append("")
-        lines.append(r"  ╔══════════════════════════════════════╗")
-        lines.append(rf"  ║  {t('floor.cleared', self.lang):<36s} ║")
-        lines.append(r"  ╚══════════════════════════════════════╝")
-        lines.append("")
+        self.console.print("")
+        self.console.print("")
 
-        for line in lines:
-            self.console.print(Align.center(line, style=COLOR_HIGHLIGHT))
+        # Victory banner — use Rich Panel for CJK-safe alignment
+        victory_text = Text(t("floor.cleared", self.lang), style=Style(color="#FFAA00", bold=True))
+        victory_panel = Panel(
+            Align.center(victory_text),
+            border_style=Style(color="#FFAA00"),
+            box=box.DOUBLE,
+            padding=(1, 6),
+        )
+        self.console.print(Align.center(victory_panel))
 
         # Floor narrative
         floor_name = t(f"floor.{floor_cleared}.name", self.lang)
