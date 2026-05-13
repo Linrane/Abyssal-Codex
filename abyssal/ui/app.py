@@ -355,9 +355,19 @@ class GameApp:
                 return True
 
     def _show_message(self, text: str):
-        """Flash a temporary message."""
-        self.message = text
-        self.message_timer = 3
+        """Show a message panel and wait for key dismissal."""
+        panel = Panel(
+            Text(text, style=COLOR_BRIGHT),
+            border_style=COLOR_HIGHLIGHT,
+            box=box.ROUNDED,
+            padding=(0, 2),
+        )
+        self.console.clear()
+        self.console.print("")
+        self.console.print(Align.center(panel))
+        self.console.print("")
+        self.console.print(Align.center(Text(t("misc.press_any", self.lang), style=COLOR_DIM)))
+        self.key_handler.get_key()
 
     # ── Main Menu ────────────────────────────────────────────────────
     # Framework Section 3.1: ASCII art title, colorized, controls legend
@@ -711,7 +721,10 @@ class GameApp:
                     self.engine.move_to_node(node_id)
                     node = fm.nodes[node_id]
 
-                    if node.room_type in (RoomType.COMBAT, RoomType.ELITE, RoomType.BOSS):
+                    if node.room_type == RoomType.BOSS:
+                        self._show_boss_intro(self.engine.state.current_floor)
+                        self._show_combat()
+                    elif node.room_type in (RoomType.COMBAT, RoomType.ELITE):
                         self._show_combat()
                     elif node.room_type == RoomType.EVENT:
                         self._show_event()
@@ -719,6 +732,40 @@ class GameApp:
                         self._show_shop()
                     elif node.room_type == RoomType.REST:
                         self._show_rest()
+
+    def _show_boss_intro(self, floor_id: int) -> None:
+        """Dramatic boss intro screen before boss combat."""
+        self.console.clear()
+        boss_name = t(f"enemy.{['sanctum_guardian','blight_treant','star_lord'][min(floor_id-1,2)]}", self.lang)
+        intro_text = t(f"boss.intro.{min(floor_id, 3)}", self.lang)
+
+        self.console.print("")
+        self.console.print("")
+        approach = Text(t("boss.approach", self.lang), style=Style(color="#FF4444", bold=True))
+        self.console.print(Align.center(approach))
+        self.console.print("")
+
+        # Boss name banner
+        banner = Panel(
+            Text(f"👑 {boss_name}", style=Style(bold=True, color="#FFAA00")),
+            border_style=COLOR_HP_RED,
+            box=box.HEAVY,
+        )
+        self.console.print(Align.center(banner))
+        self.console.print("")
+
+        # Narrative text
+        narrative = Panel(
+            Text(intro_text, style=COLOR_BRIGHT),
+            border_style=COLOR_DIM,
+            box=box.ROUNDED,
+            padding=(1, 2),
+        )
+        self.console.print(Align.center(narrative))
+        self.console.print("")
+        self.console.print(Align.center(Text(t("misc.press_any", self.lang), style=COLOR_DIM)))
+
+        self.key_handler.get_key()
 
     def _show_floor_transition(self, floor_cleared: int) -> None:
         """Narrative transition screen between floors."""
@@ -1078,10 +1125,26 @@ class GameApp:
                 )
                 self.console.print(result_panel)
 
-                # Show effects
+                # Show effects with translation
                 if result.get("effects"):
                     for eff in result["effects"]:
-                        self.console.print(f"  → {eff}", style=COLOR_DIM)
+                        if isinstance(eff, dict):
+                            eff_type = eff.get("type", "")
+                            eff_value = eff.get("value", 0)
+                            eff_name = eff.get("name", "")
+                            # Format each effect type with i18n
+                            eff_label_key = f"event.effect.{eff_type}"
+                            eff_label = t(eff_label_key, self.lang)
+                            if eff_label == eff_label_key:  # fallback
+                                eff_label = eff_type
+                            if eff_name:
+                                card_name = t(eff_name, self.lang)
+                                formatted = t("event.effect.with_name", self.lang).format(type=eff_label, name=card_name)
+                            else:
+                                formatted = t("event.effect.with_value", self.lang).format(type=eff_label, value=eff_value)
+                            self.console.print(f"  → {formatted}", style=COLOR_DIM)
+                        else:
+                            self.console.print(f"  → {eff}", style=COLOR_DIM)
 
                 self.console.print(Align.center(Text(
                     t("event.continue_hint", self.lang), style=COLOR_DIM
@@ -1294,7 +1357,7 @@ class GameApp:
                         f" {cursor} 💚 {t('rest.heal', self.lang)} — {t('rest.heal_desc', self.lang)} (+{heal_amt} HP){hint}"
                     )
                 elif opt == "upgrade":
-                    upgradable = sum(1 for c in state.deck if not c.upgraded and c.upgraded_effects)
+                    upgradable = sum(1 for c in state.deck if not c.upgraded and (c.upgraded_effects or c.upgraded_cost > 0))
                     if upgradable == 0:
                         self.console.print(
                             f" {cursor} 🔨 {t('rest.upgrade', self.lang)} — [{t('hint.no_upgradable', self.lang)}]"
@@ -1325,7 +1388,7 @@ class GameApp:
                     self._show_message(t("rest.heal_done", self.lang))
                     break
                 elif selected == 1:
-                    upgradable = [i for i, c in enumerate(state.deck) if not c.upgraded and c.upgraded_effects]
+                    upgradable = [i for i, c in enumerate(state.deck) if not c.upgraded and (c.upgraded_effects or c.upgraded_cost > 0)]
                     if not upgradable:
                         self._show_message(t("hint.no_upgradable", self.lang))
                         continue
@@ -1343,6 +1406,31 @@ class GameApp:
         state = self.engine.state
         selected = 0
 
+        def _fmt_effect(e) -> str:
+            """Format a CardEffect or dict for display."""
+            if isinstance(e, dict):
+                etype = e.get('type', '')
+                val = e.get('value', 0)
+                status = e.get('status', '')
+            elif hasattr(e, 'type'):
+                etype = e.type
+                val = e.value
+                status = getattr(e, 'status', '')
+            else:
+                return "?"
+            # Translate effect type
+            type_key = f"keyword.{etype}" if etype else ""
+            type_label = t(type_key, self.lang) if etype else ""
+            if not type_label or type_label == type_key:
+                type_label = etype
+            if status:
+                status_key = f"keyword.{status}"
+                status_label = t(status_key, self.lang) if status_key else status
+                if status_label == status_key:
+                    status_label = status
+                return f"{type_label} {val} [{status_label}]"
+            return f"{type_label} {val}"
+
         while self.running:
             self.console.clear()
             header = Panel(
@@ -1355,24 +1443,25 @@ class GameApp:
 
             for i, deck_idx in enumerate(upgradable_indices):
                 card = state.deck[deck_idx]
-                cursor = "►" if i == selected else " "
+                cursor = ">>" if i == selected else "  "
                 name = _card_name(card, self.lang)
-                # Show before/after
+                # Show before/after effects with proper formatting
                 current_effects = card.get_effects()
-                current_desc = ", ".join(
-                    f"{e.type}:{e.value}" if hasattr(e, 'type') else e.get('type', '')
-                    for e in current_effects[:2]
-                )
+                current_desc = ", ".join(_fmt_effect(e) for e in current_effects[:3]) if current_effects else t("keyword.none", self.lang)
                 upgraded_effects = card.upgraded_effects
-                upgraded_desc = ", ".join(
-                    f"{e.get('type', '')}:{e.get('value', '')}"
-                    for e in upgraded_effects[:2]
-                )
-                self.console.print(
-                    f" {cursor} [{card.cost}⚡] {name}  |  {current_desc}  →  {upgraded_desc}"
-                )
+                upgraded_desc = ", ".join(_fmt_effect(e) for e in upgraded_effects[:3]) if upgraded_effects else "—"
+                # Cost change
+                cost_str = f"{card.cost}⚡"
+                if card.upgraded_cost and card.upgraded_cost != card.cost:
+                    cost_str += f"→{card.upgraded_cost}⚡"
 
-            self.console.print("")
+                self.console.print(
+                    f" {cursor} [{cost_str}] {name}"
+                )
+                self.console.print(f"       {t('rest.current', self.lang)}: {current_desc}", style=COLOR_DIM)
+                self.console.print(f"       {t('rest.upgraded', self.lang)}: {upgraded_desc}", style=COLOR_HIGHLIGHT)
+                self.console.print("")
+
             controls = Text(
                 f"↑↓ {t('menu.select', self.lang)} | Enter {t('menu.confirm', self.lang)} | ESC {t('menu.back', self.lang)}",
                 style=COLOR_DIM,

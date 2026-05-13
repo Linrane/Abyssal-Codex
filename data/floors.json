@@ -6,20 +6,20 @@
       "elite_pool":["stone_sentinel"],
       "boss_pool":["sanctum_guardian"],
       "event_pool":["echoing_spring","sealed_chest","wandering_merchant","sanctum_library","sacred_armory"],
-      "rooms_min":4,"rooms_max":6},
+      "rooms_min":7,"rooms_max":9},
     {"id":2,"name_key":"floor.2.name","desc_key":"floor.2.desc",
       "effect":{"type":"turn_start","turn":3,"status":"poison","value":1,"target":"all"},
       "enemy_pool":["vine_horror","shadow_hunter","swamp_lurker"],
       "elite_pool":["thorn_beast"],
       "boss_pool":["blight_treant"],
       "event_pool":["fountain_of_echoes","abyssal_altar","fallen_hero","ghostly_smith","broken_blade","blood_moon","runic_circle"],
-      "rooms_min":4,"rooms_max":6},
+      "rooms_min":7,"rooms_max":9},
     {"id":3,"name_key":"floor.3.name","desc_key":"floor.3.desc",
       "effect":{"type":"energy_bonus","value":1,"cost_fluctuation":true},
       "enemy_pool":["void_walker","time_warp","astral_wisp"],
       "elite_pool":["rift_reaver"],
       "boss_pool":["star_lord"],
       "event_pool":["shattered_mirror","void_whispers","mercy_of_the_void","twelve_souls_shrine","old_god_offering","seal_of_truth"],
-      "rooms_min":4,"rooms_max":5}
+      "rooms_min":6,"rooms_max":8}
   ]
 }

@@ -95,6 +95,21 @@ ZH = {
     "event.continue": "继续前行",
     "event.risk": "风险",
     "event.reward": "奖励",
+    "event.effect.with_name": "获得 [{name}]",
+    "event.effect.with_value": "{type} {value}",
+    "event.effect.heal": "回复",
+    "event.effect.lose_gold": "失去金币",
+    "event.effect.gain_gold": "获得金币",
+    "event.effect.get_relic": "获得遗物",
+    "event.effect.get_card": "获得卡牌",
+    "event.effect.get_legendary": "获得传说卡牌",
+    "event.effect.get_curse": "获得诅咒",
+    "event.effect.remove_card": "移除卡牌",
+    "event.effect.remove_curses": "移除诅咒",
+    "event.effect.transform_card": "转换卡牌",
+    "event.effect.upgrade_card": "升级卡牌",
+    "event.effect.take_damage": "受到伤害",
+    "event.effect.lose_hp": "失去生命",
 
     # === Rewards ===
     "reward.card_select": "选择一张卡牌",
@@ -182,6 +197,12 @@ ZH = {
     "floor.enter_next": "进入下一层",
     "floor.final_floor": "最终层 — 星核裂隙",
     "floor.no_return": "前方已无退路...",
+
+    # === Boss Intros ===
+    "boss.intro.1": "圣堂深处，沉重的脚步声回荡在碎裂的大理石地面上。\n被诅咒的守护者从阴影中现身，手中的圣光已扭曲为幽暗的火焰。",
+    "boss.intro.2": "密林之心，古老的树木发出低沉的咆哮。\n腐化的力量在根系间流淌，树精的眼中燃烧着深渊的绿焰。",
+    "boss.intro.3": "星核裂隙之中，虚空的光辉扭曲了时空。\n星灵之主从星河中央凝聚成形，每一颗星辰都是祂的眼睛。",
+    "boss.approach": "前方传来强大的压迫感...",
 
     # === Misc ===
     "misc.press_any": "按任意键继续...",
@@ -683,6 +704,20 @@ ZH = {
     "rest.cannot_upgrade": "牌组中没有可升级的卡牌",
     "rest.upgrade_done": "卡牌已升级！",
     "rest.upgrade_preview": "升级预览",
+    "rest.current": "当前",
+    "rest.upgraded": "升级后",
+
+    # === Card effect types ===
+    "keyword.none": "无",
+    "keyword.damage": "伤害",
+    "keyword.block": "格挡",
+    "keyword.heal": "回复",
+    "keyword.apply_status": "施加",
+    "keyword.draw": "抽牌",
+    "keyword.gain_energy": "能量",
+    "keyword.aoe": "群体伤害",
+    "keyword.multi_hit": "多段",
+    "keyword.heal_percent": "回复%",
     "reward.skip_hint": "S: 跳过（拥有破碎王冠时获得20金币）",
     "reward.card_count": "牌组：{0} 张",
     "reward.relic_desc": "遗物效果",

@@ -172,9 +172,12 @@ class GameEngine:
                                   available=True, visited=True)
 
         # Plan rows 1..num_rooms-1 (boss at num_rooms)
-        # Guarantee: 1 event, 1 shop, 1 rest across the floor
-        side_types = [RoomType.EVENT, RoomType.SHOP, RoomType.REST]
+        # Guarantee: 2 events, 2 shops, 2 rests across the floor (more content)
+        side_types = [RoomType.EVENT, RoomType.SHOP, RoomType.REST] * 2
         random.shuffle(side_types)
+        # Limit to fit in available rows
+        max_sides = num_rooms - 1
+        side_types = side_types[:max_sides]
 
         prev_nodes = ["start"]  # nodes from previous row that connect forward
         side_idx = 0
@@ -200,8 +203,7 @@ class GameEngine:
                 for pn in prev_nodes:
                     if sid not in nodes[pn].connected_to:
                         nodes[pn].connected_to.append(sid)
-                # Side node connects forward to next row's combat (NOT same row)
-                # The next iteration's for-pn loop will add forward connections
+                # Side node connects forward to next row's nodes (not same row)
                 new_prev.append(sid)
                 side_idx += 1
 

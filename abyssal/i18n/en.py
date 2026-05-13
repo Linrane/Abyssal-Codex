@@ -95,6 +95,21 @@ EN = {
     "event.continue": "Continue onward",
     "event.risk": "Risk",
     "event.reward": "Reward",
+    "event.effect.with_name": "Gained [{name}]",
+    "event.effect.with_value": "{type} {value}",
+    "event.effect.heal": "Heal",
+    "event.effect.lose_gold": "Lose Gold",
+    "event.effect.gain_gold": "Gain Gold",
+    "event.effect.get_relic": "Get Relic",
+    "event.effect.get_card": "Get Card",
+    "event.effect.get_legendary": "Get Legendary",
+    "event.effect.get_curse": "Get Curse",
+    "event.effect.remove_card": "Remove Card",
+    "event.effect.remove_curses": "Remove Curses",
+    "event.effect.transform_card": "Transform Card",
+    "event.effect.upgrade_card": "Upgrade Card",
+    "event.effect.take_damage": "Take Damage",
+    "event.effect.lose_hp": "Lose HP",
 
     # === Rewards ===
     "reward.card_select": "Choose a Card",
@@ -182,6 +197,12 @@ EN = {
     "floor.enter_next": "Enter the next floor",
     "floor.final_floor": "Final Floor — Star Core Rift",
     "floor.no_return": "There is no turning back...",
+
+    # === Boss Intros ===
+    "boss.intro.1": "Deep within the sanctuary, heavy footsteps echo across shattered marble.\nThe cursed guardian emerges from shadow — its holy light twisted into dark flame.",
+    "boss.intro.2": "In the heart of the gloomwood, ancient trees utter a low roar.\nCorruption pulses through roots — the treant's eyes burn with abyssal green fire.",
+    "boss.intro.3": "At the star core rift, void-light bends time and space.\nThe Star Lord coalesces from the galactic center — every star an eye fixed upon you.",
+    "boss.approach": "An overwhelming presence looms ahead...",
 
     # === Misc ===
     "misc.press_any": "Press any key to continue...",
@@ -683,6 +704,20 @@ EN = {
     "rest.cannot_upgrade": "No upgradable cards in deck",
     "rest.upgrade_done": "Card upgraded!",
     "rest.upgrade_preview": "Upgrade Preview",
+    "rest.current": "Current",
+    "rest.upgraded": "Upgraded",
+
+    # === Card effect types ===
+    "keyword.none": "None",
+    "keyword.damage": "Damage",
+    "keyword.block": "Block",
+    "keyword.heal": "Heal",
+    "keyword.apply_status": "Apply",
+    "keyword.draw": "Draw",
+    "keyword.gain_energy": "Energy",
+    "keyword.aoe": "AoE",
+    "keyword.multi_hit": "Multi-hit",
+    "keyword.heal_percent": "Heal%",
     "reward.skip_hint": "S: Skip (gain 20G with Broken Crown)",
     "reward.card_count": "Deck: {0} cards",
     "reward.relic_desc": "Relic Effect",

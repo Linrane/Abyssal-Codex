@@ -42,6 +42,7 @@ class EventRunner:
         """Execute a player's choice. Returns result dictionary."""
         result = {"success": True, "message": "", "effects": []}
         state = self.engine.state
+        lang = getattr(state, 'lang', 'zh')
 
         # Check chance
         if choice.chance < 1.0:
@@ -51,7 +52,7 @@ class EventRunner:
                 result["message"] = choice.fail_text_key
                 return result
 
-        # Apply effects
+        # Apply effects — store structured data for UI to format
         for effect in choice.effects:
             effect_type = effect.get("type", "")
             value = effect.get("value", 0)
@@ -59,24 +60,24 @@ class EventRunner:
             if effect_type == "heal_percent":
                 heal_amt = int(state.max_hp * value)
                 state.hp = min(state.max_hp, state.hp + heal_amt)
-                result["effects"].append(f"Healed {heal_amt} HP")
+                result["effects"].append({"type": "heal", "value": heal_amt})
 
             elif effect_type == "remove_gold":
                 self.engine.spend_gold(value)
-                result["effects"].append(f"Lost {value} gold")
+                result["effects"].append({"type": "lose_gold", "value": value})
 
             elif effect_type == "add_random_relic":
                 relic = self.engine.generate_relic_reward()
                 if relic:
                     state.relics.append(relic)
-                    result["effects"].append(f"Got relic: {relic.name_key}")
+                    result["effects"].append({"type": "get_relic", "name": relic.name_key})
 
             elif effect_type == "add_random_rare_card":
                 pool = [c for c in self.engine.get_card_pool() if c.rarity.value == "rare"]
                 if pool:
                     card = random.choice(pool)
                     self.engine.add_card_to_deck(card)
-                    result["effects"].append(f"Got card: {card.name_key}")
+                    result["effects"].append({"type": "get_card", "name": card.name_key})
 
             elif effect_type == "add_random_legendary_card":
                 pool = [c for c in self.engine._all_cards.values()
@@ -84,41 +85,41 @@ class EventRunner:
                 if pool:
                     card = deepcopy(random.choice(pool))
                     self.engine.add_card_to_deck(card)
-                    result["effects"].append(f"Got legendary: {card.name_key}")
+                    result["effects"].append({"type": "get_legendary", "name": card.name_key})
 
             elif effect_type == "add_random_card":
                 pool = self.engine.get_card_pool()
                 if pool:
                     card = random.choice(pool)
                     self.engine.add_card_to_deck(card)
-                    result["effects"].append(f"Got card: {card.name_key}")
+                    result["effects"].append({"type": "get_card", "name": card.name_key})
 
             elif effect_type == "add_specific_card":
                 card_id = effect.get("card_id", "")
                 if card_id in self.engine._all_cards:
                     card = deepcopy(self.engine._all_cards[card_id])
                     self.engine.add_card_to_deck(card)
-                    result["effects"].append(f"Got card: {card.name_key}")
+                    result["effects"].append({"type": "get_card", "name": card.name_key})
 
             elif effect_type == "add_curse_card":
                 card_id = effect.get("card_id", "doubt")
                 cards = self.engine._all_cards
                 if card_id in cards:
-                    from copy import deepcopy
                     self.engine.add_card_to_deck(deepcopy(cards[card_id]))
-                    result["effects"].append(f"Added curse: {card_id}")
+                    result["effects"].append({"type": "get_curse", "name": card_id})
 
             elif effect_type == "remove_random_card":
                 if state.deck:
                     idx = random.randrange(len(state.deck))
                     card = state.deck.pop(idx)
-                    result["effects"].append(f"Removed: {card.name_key}")
+                    result["effects"].append({"type": "remove_card", "name": card.name_key})
 
             elif effect_type == "remove_curse_cards":
                 curses = [i for i, c in enumerate(state.deck) if c.card_type.value == "curse"]
+                count = len(curses)
                 for idx in reversed(curses):
                     state.deck.pop(idx)
-                result["effects"].append(f"Removed {len(curses)} curses")
+                result["effects"].append({"type": "remove_curses", "value": count})
 
             elif effect_type == "transform_card":
                 if state.deck:
@@ -127,30 +128,30 @@ class EventRunner:
                     if pool:
                         new_card = random.choice(pool)
                         state.deck[idx] = new_card
-                        result["effects"].append(f"Transformed a card")
+                        result["effects"].append({"type": "transform_card"})
 
             elif effect_type == "upgrade_random_card":
                 upgradable = [i for i, c in enumerate(state.deck) if not c.upgraded and c.upgraded_effects]
                 if upgradable:
                     idx = random.choice(upgradable)
                     state.deck[idx].upgraded = True
-                    result["effects"].append(f"Upgraded: {state.deck[idx].name_key}")
+                    result["effects"].append({"type": "upgrade_card", "name": state.deck[idx].name_key})
 
             elif effect_type == "damage":
                 state.hp = max(0, state.hp - value)
-                result["effects"].append(f"Took {value} damage")
+                result["effects"].append({"type": "take_damage", "value": value})
                 if state.hp <= 0:
                     result["death"] = True
 
             elif effect_type == "damage_self":
                 state.hp = max(0, state.hp - value)
-                result["effects"].append(f"Lost {value} HP")
+                result["effects"].append({"type": "lose_hp", "value": value})
                 if state.hp <= 0:
                     result["death"] = True
 
             elif effect_type == "gain_gold":
                 self.engine.add_gold(value)
-                result["effects"].append(f"Gained {value} gold")
+                result["effects"].append({"type": "gain_gold", "value": value})
 
         # Set story flag if applicable
         if event.story_flag_set:
