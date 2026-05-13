@@ -300,6 +300,13 @@ class GameApp:
         self.message: str = ""
         self.message_timer: int = 0
 
+    # ── Main Loop ────────────────────────────────────────────────────
+
+    def run(self) -> None:
+        """Main application loop."""
+        self.console.clear()
+        self._show_main_menu()
+
     # ── Helpers ──────────────────────────────────────────────────────
 
     def _make_menu_panel(self, options: list[tuple[str, str]], selected: int,
