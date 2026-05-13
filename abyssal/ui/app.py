@@ -595,19 +595,15 @@ class GameApp:
             self.console.print(Align.center(status_line))
             self.console.print("")
 
-            # Node graph — framework Section 7.2, 12
+            # Node graph — build a Rich Table for alignment
+            # Layout: nodes at col=2 (combat path) and col=4 (side path)
             available = set(self.engine.get_available_nodes())
             avail_list = sorted(available)
-            # Clamp selected index
             if avail_list:
                 selected_avail_idx = max(0, min(selected_avail_idx, len(avail_list) - 1))
             current_node_id = fm.current_node
             nodes = fm.nodes
 
-            icons = {
-                RoomType.START: "🏁", RoomType.COMBAT: "⚔", RoomType.ELITE: "💀",
-                RoomType.SHOP: "💰", RoomType.EVENT: "❓", RoomType.REST: "🏕", RoomType.BOSS: "👑",
-            }
             node_labels = {
                 RoomType.START: t("map.room_start", self.lang),
                 RoomType.COMBAT: t("map.room_combat", self.lang),
@@ -620,44 +616,63 @@ class GameApp:
 
             max_row = max((n.row for n in nodes.values()), default=0)
 
-            for row in range(max_row + 1):
-                row_nodes = sorted([n for n in nodes.values() if n.row == row], key=lambda n: n.col)
-                row_parts = []
-                for node in row_nodes:
-                    icon = icons.get(node.room_type, "?")
-                    label = node_labels.get(node.room_type, "?")
+            map_table = Table(box=None, show_header=False, padding=0, show_edge=False, show_lines=False)
+            map_table.add_column(width=4)    # left indent
+            map_table.add_column(width=14)   # col=2: combat path (+ start, boss)
+            map_table.add_column(width=6)    # gap
+            map_table.add_column(width=14)   # col=4: side path (event/shop/rest)
+            map_table.add_column(width=4)    # right indent
 
-                    if node.id == current_node_id:
-                        marker = f"[{t('map.you_are_here', self.lang)}]"
-                        node_style = COLOR_HIGHLIGHT
-                    elif node.visited:
-                        marker = "✓"
-                        node_style = COLOR_DIM
-                    elif node.id in available:
-                        # Highlight only the selected available node
-                        try:
-                            is_selected = avail_list[selected_avail_idx] == node.id
-                        except IndexError:
-                            is_selected = False
-                        if is_selected:
-                            marker = "▶"
-                            node_style = COLOR_HIGHLIGHT
-                        else:
-                            marker = " "
-                            node_style = COLOR_NODE.get(node.room_type, COLOR_BRIGHT)
-                    else:
-                        marker = " "
-                        node_style = COLOR_DIM
+            def render_node(node_id):
+                """Build styled Text for a node, or empty Text."""
+                if node_id not in nodes:
+                    return Text("")
+                node = nodes[node_id]
+                label = node_labels.get(node.room_type, "?")
+                if node.id == current_node_id:
+                    t_node = Text()
+                    t_node.append(">>", style=COLOR_HIGHLIGHT)
+                    t_node.append(f"{label}", style=COLOR_HIGHLIGHT)
+                elif node.visited:
+                    t_node = Text(f"  {label}", style=COLOR_DIM)
+                elif node.id in available:
+                    is_sel = avail_list[selected_avail_idx] == node.id
+                    st = COLOR_HIGHLIGHT if is_sel else COLOR_NODE.get(node.room_type, COLOR_BRIGHT)
+                    marker = ">>" if is_sel else "  "
+                    t_node = Text()
+                    t_node.append(marker, style=st)
+                    t_node.append(f"{label}", style=st)
+                else:
+                    t_node = Text(f"  {label}", style=COLOR_DIM)
+                return t_node
 
-                    row_parts.append(
-                        f" {marker}{icon} {label} "
+            for row_idx in range(max_row + 1):
+                row_nids = {n.col: n.id for n in nodes.values() if n.row == row_idx}
+                map_table.add_row(
+                    Text(""),
+                    render_node(row_nids.get(2, "")),
+                    Text("  "),
+                    render_node(row_nids.get(4, "")),
+                    Text(""),
+                )
+                # Connector row
+                if row_idx < max_row:
+                    next_nids = {n.col: n.id for n in nodes.values() if n.row == row_idx + 1}
+                    def conn_cell(col_pos):
+                        has_cur = col_pos in row_nids
+                        has_nxt = col_pos in next_nids
+                        if has_cur and has_nxt:
+                            return Text("     │", style=COLOR_DIM)
+                        return Text("")
+                    map_table.add_row(
+                        Text(""),
+                        conn_cell(2),
+                        Text("  "),
+                        conn_cell(4),
+                        Text(""),
                     )
 
-                # Add connector lines between nodes
-                line = "     " + "  ──  ".join(row_parts) if row_parts else ""
-                if line.strip():
-                    self.console.print(line)
-
+            self.console.print(Align.center(map_table))
             self.console.print("")
 
             # Selection hint
@@ -666,11 +681,12 @@ class GameApp:
                 selected_node = fm.nodes.get(selected_node_id)
                 if selected_node:
                     sel_label = node_labels.get(selected_node.room_type, "?")
-                    hint = Text(
-                        f"▶ {t('map.selected', self.lang)}: {sel_label}  ←→ {t('map.switch_node', self.lang)}  Enter {t('map.confirm_move', self.lang)}",
-                        style=COLOR_BRIGHT,
-                    )
-                    self.console.print(Align.center(hint))
+                    hint_text = Text()
+                    hint_text.append(">> ", style=COLOR_HIGHLIGHT)
+                    hint_text.append(f"{t('map.selected', self.lang)}: ", style=COLOR_BRIGHT)
+                    hint_text.append(sel_label, style=COLOR_HIGHLIGHT)
+                    hint_text.append(f"    ←→ {t('map.switch_node', self.lang)}    Enter {t('map.confirm_move', self.lang)}", style=COLOR_DIM)
+                    self.console.print(Align.center(hint_text))
                     self.console.print("")
 
             # Controls

@@ -190,7 +190,7 @@ class GameEngine:
                 if cid not in nodes[pn].connected_to:
                     nodes[pn].connected_to.append(cid)
 
-            # Place a side node at this row
+            # Place a side node at this row (alternative to combat)
             new_prev = [cid]
             if side_idx < len(side_types):
                 stype = side_types[side_idx]
@@ -200,8 +200,8 @@ class GameEngine:
                 for pn in prev_nodes:
                     if sid not in nodes[pn].connected_to:
                         nodes[pn].connected_to.append(sid)
-                # Side node also connects forward to combat
-                nodes[sid].connected_to.append(cid)
+                # Side node connects forward to next row's combat (NOT same row)
+                # The next iteration's for-pn loop will add forward connections
                 new_prev.append(sid)
                 side_idx += 1
 
