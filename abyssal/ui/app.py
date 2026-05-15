@@ -242,52 +242,123 @@ def _short_desc(card: Card, lang: str) -> str:
     return desc
 
 
-def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> Text:
-    """Render hand as a vertical card list with full text descriptions."""
-    if not hand:
-        return Text("")
+def _wrap_cjk(text: str, width: int) -> list[str]:
+    """Wrap text at display width, CJK-aware (each CJK char = 2 columns).
+    Splits on word boundaries for ASCII, char boundaries for CJK."""
+    lines = []
+    for paragraph in text.split('\n'):
+        if not paragraph:
+            lines.append('')
+            continue
+        # Tokenize: ASCII runs (split on spaces for word-wrap) vs CJK runs
+        tokens = []
+        buf = ""
+        in_cjk = None
+        for ch in paragraph:
+            is_cjk = ord(ch) > 0x7F
+            if in_cjk is None:
+                in_cjk = is_cjk
+            if is_cjk != in_cjk:
+                if buf:
+                    tokens.append((buf, in_cjk))
+                buf = ch
+                in_cjk = is_cjk
+            else:
+                buf += ch
+        if buf:
+            tokens.append((buf, in_cjk))
 
-    out = Text()
+        # Expand ASCII tokens into space-separated words
+        expanded = []
+        for tok, is_cjk in tokens:
+            if is_cjk:
+                expanded.append((tok, True))
+            else:
+                parts = tok.split(' ')
+                for j, w in enumerate(parts):
+                    if j > 0:
+                        expanded.append((' ', False))
+                    if w:
+                        expanded.append((w, False))
+
+        # Build lines from tokens
+        cur_line = ""
+        cur_w = 0
+        for tok, is_cjk in expanded:
+            tok_w = len(tok) if not is_cjk else sum(2 for _ in tok)
+            if cur_w + tok_w <= width:
+                cur_line += tok
+                cur_w += tok_w
+            else:
+                # Flush current line if non-empty
+                if cur_line:
+                    lines.append(cur_line)
+                    cur_line = ""
+                    cur_w = 0
+                # If the token itself fits on a new line, start it
+                if tok_w <= width:
+                    cur_line = tok
+                    cur_w = tok_w
+                else:
+                    # Token too long, char-by-char break
+                    for ch in tok:
+                        ch_w = 2 if ord(ch) > 0x7F else 1
+                        if cur_w + ch_w > width:
+                            if cur_line:
+                                lines.append(cur_line)
+                            cur_line = ch
+                            cur_w = ch_w
+                        else:
+                            cur_line += ch
+                            cur_w += ch_w
+        if cur_line:
+            lines.append(cur_line)
+    return lines
+
+
+def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> str:
+    """Render hand cards horizontally with full text descriptions in each column."""
+    if not hand:
+        return ""
+
+    # Dynamic column width based on hand size
+    n = len(hand)
+    if n <= 4:
+        col_width = 18
+    elif n <= 6:
+        col_width = 15
+    else:
+        col_width = 13
+
+    table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1), show_edge=False, show_lines=False)
+    for _ in hand:
+        table.add_column(justify="center", width=col_width, no_wrap=True)
+
+    # Build each card's content as multi-line cell text
+    cells = []
     for i, card in enumerate(hand):
-        is_sel = i == selected_idx
+        name = _card_name(card, lang)
         cost = card.get_cost()
         playable = cost <= energy
-        name = _card_name(card, lang)
+        cost_str = f"[{cost}]" if playable else f"({cost})"
         ctype = t(f"card.type.{card.card_type.value}", lang)
         desc = _short_desc(card, lang)
 
-        if i > 0:
-            out.append("\n")
+        marker = ">>" if i == selected_idx else "  "
+        header = f"{marker}{name}\n{cost_str} {ctype}"
 
-        # Selection marker
-        marker = ">>" if is_sel else "  "
-        if is_sel:
-            out.append(f"{marker} ", style=COLOR_HIGHLIGHT)
-        else:
-            out.append(f"{marker} ", style=COLOR_DIM)
+        # Wrap description to fit column, append to header
+        wrapped = _wrap_cjk(desc, col_width)
+        cell_text = header + "\n" + "\n".join(wrapped)
+        cells.append(cell_text)
 
-        # Quick-select key
-        out.append(f"{i+1}: ", style=COLOR_DIM)
+    table.add_row(*cells)
 
-        # Cost
-        if playable:
-            out.append(f"[{cost}⚡]", style=COLOR_ENERGY)
-        else:
-            out.append(f"({cost}⚡)", style=COLOR_HP_RED)
-
-        out.append(" ")
-
-        # Card name — color by type
-        card_color = CARD_TYPE_COLOR.get(card.card_type.value, COLOR_BRIGHT)
-        out.append(name, style=card_color)
-
-        out.append(" ", style=COLOR_DIM)
-        out.append(f"({ctype})", style=COLOR_DIM)
-
-        # Full text description
-        out.append(f"  {desc}")
-
-    return out
+    from rich.console import Console as RC
+    tmp = RC(width=200)
+    with tmp.capture() as capture:
+        tmp.print(table)
+    return capture.get().rstrip()
 
 
 def render_card_mini(card: Card, lang: str = "zh", selected: bool = False, playable: bool = True) -> str:
@@ -445,7 +516,7 @@ class GameApp:
                 f"1-4 {t('menu.select', self.lang)} | L 中文/English | ESC {t('menu.quit', self.lang)}",
                 style=COLOR_DIM,
             )
-            version = Text("v0.4.4 · MIT License", style=COLOR_DIM)
+            version = Text("v0.4.5 · MIT License", style=COLOR_DIM)
 
             # Compose layout
             layout_lines = [
