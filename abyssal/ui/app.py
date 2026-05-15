@@ -205,18 +205,39 @@ def _intent_display(intent_type: str, value: int = 0, status: str = "", status_v
 # ── Card Widget Renderer (framework Section 3.1) ──────────────────────
 
 def _short_desc(card: Card, lang: str) -> str:
-    """Get a short single-line description for a card."""
+    """Get a short single-line description for a card with values filled in."""
     desc = t(card.desc_key, lang)
     effects = card.get_effects()
+    # Collect ALL numeric values from effects for placeholder filling
     args = []
     for eff in effects:
-        val = getattr(eff, 'value', 0) if hasattr(eff, 'value') else eff.get('value', 0)
-        etype = eff.type if hasattr(eff, 'type') else eff.get('type', '')
-        if etype in ("damage", "block", "heal", "apply_status", "draw", "gain_energy"):
-            args.append(str(val))
+        if hasattr(eff, 'value'):
+            val = eff.value
+            status = getattr(eff, 'status', '')
+            duration = getattr(eff, 'duration', 0)
+            sec = getattr(eff, 'secondary_value', 0)
+            etype = eff.type
+        else:
+            # Dict fallback (shouldn't happen, but defensive)
+            val = eff.get('value', 0)
+            status = eff.get('status', '')
+            duration = eff.get('duration', 0)
+            sec = eff.get('secondary_value', 0)
+            etype = eff.get('type', '')
+        # Always include the primary value
+        args.append(str(val))
+        # Include status/duration if relevant (for multi-placeholder descs)
+        if etype == "apply_status" and status:
+            args.append(status)
+        if duration > 0:
+            args.append(str(duration))
+        if sec > 0:
+            args.append(str(sec))
     try:
-        desc = desc.format(*args)
-    except (IndexError, KeyError):
+        if args:
+            desc = desc.format(*args)
+    except (IndexError, KeyError, ValueError):
+        # If format fails, return description as-is (hardcoded values)
         pass
     return desc
 
@@ -419,7 +440,7 @@ class GameApp:
                 f"1-4 {t('menu.select', self.lang)} | L 中文/English | ESC {t('menu.quit', self.lang)}",
                 style=COLOR_DIM,
             )
-            version = Text("v0.4.1 · MIT License", style=COLOR_DIM)
+            version = Text("v0.4.2 · MIT License", style=COLOR_DIM)
 
             # Compose layout
             layout_lines = [
