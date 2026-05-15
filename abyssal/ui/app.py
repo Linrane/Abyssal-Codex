@@ -242,42 +242,92 @@ def _short_desc(card: Card, lang: str) -> str:
     return desc
 
 
+def _fmt_effect_line(eff, lang: str) -> str:
+    """Format a single CardEffect into a compact display string."""
+    if hasattr(eff, 'type'):
+        etype, val, status, duration, sec = eff.type, eff.value, getattr(eff, 'status', ''), getattr(eff, 'duration', 0), getattr(eff, 'secondary_value', 0)
+    else:
+        etype = eff.get('type', '')
+        val = eff.get('value', 0)
+        status = eff.get('status', '')
+        duration = eff.get('duration', 0)
+        sec = eff.get('secondary_value', 0)
+
+    type_label = t(f"keyword.{etype}", lang)
+    if type_label.startswith("keyword."):
+        type_label = etype  # fallback
+
+    if etype == "damage":
+        return f"⚔{val}"
+    elif etype == "block":
+        return f"🛡{val}"
+    elif etype == "heal":
+        return f"💚{val}"
+    elif etype == "apply_status":
+        status_label = t(f"keyword.{status}", lang)
+        if status_label.startswith("keyword."):
+            status_label = status
+        dur = f"/{duration}" if duration > 0 and duration < 99 else ""
+        return f"{status_label} {val}{dur}"
+    elif etype == "draw":
+        return f"📥{val}"
+    elif etype == "gain_energy":
+        return f"⚡+{val}"
+    elif etype == "damage_self":
+        return f"❤-{val}"
+    elif etype == "aoe":
+        return f"💥{val}"
+    elif etype == "multi_hit":
+        return f"✕{val}"
+    elif etype == "heal_percent":
+        return f"💚{int(val*100)}%"
+    else:
+        return f"{type_label}{val}"
+
+
 def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> str:
-    """Render hand cards as Rich Table columns — CJK-safe via Rich layout."""
+    """Render hand cards as Rich Table — shows full effect details per card."""
     if not hand:
         return ""
 
-    table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1), show_edge=False)
+    # Wider columns for more detail
+    col_width = 16
+    table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1), show_edge=False, show_lines=False)
     for _ in hand:
-        table.add_column(justify="center", width=14)
+        table.add_column(justify="center", width=col_width, no_wrap=False)
 
-    # Build 3 rows: name, cost+type, short desc
+    # Determine max effect count across all cards
+    max_effects = max((len(card.get_effects()) for card in hand), default=0)
+
+    # Row 0: card names
     names = []
-    costs = []
-    descs = []
     for i, card in enumerate(hand):
         name = _card_name(card, lang)
-        if i == selected_idx:
-            name = ">>" + name
-        else:
-            name = "  " + name
+        marker = ">>" if i == selected_idx else "  "
+        names.append(f"{marker}{name}")
+    table.add_row(*names)
+
+    # Row 1: cost + type badge
+    costs = []
+    for i, card in enumerate(hand):
         cost = card.get_cost()
         playable = cost <= energy
         cost_mark = f"[{cost}]" if playable else f"({cost})"
         ctype = t(f"card.type.{card.card_type.value}", lang)
-        cost_str = f"{cost_mark} {ctype}"
-        short = _short_desc(card, lang)
-
-        names.append(name)
-        costs.append(cost_str)
-        descs.append(short)
-
-    table.add_row(*names)
+        costs.append(f"{cost_mark} {ctype}")
     table.add_row(*costs)
-    table.add_row(*descs)
 
-    # We can't return Rich objects directly here since the caller uses console.print()
-    # Return as string via console capture
+    # Row 2+: one row per effect (up to max_effects)
+    for eff_idx in range(max_effects):
+        eff_row = []
+        for card in hand:
+            effects = card.get_effects()
+            if eff_idx < len(effects):
+                eff_row.append(_fmt_effect_line(effects[eff_idx], lang))
+            else:
+                eff_row.append("")
+        table.add_row(*eff_row)
+
     from rich.console import Console as RC
     tmp = RC(width=200)
     with tmp.capture() as capture:
@@ -440,7 +490,7 @@ class GameApp:
                 f"1-4 {t('menu.select', self.lang)} | L 中文/English | ESC {t('menu.quit', self.lang)}",
                 style=COLOR_DIM,
             )
-            version = Text("v0.4.2 · MIT License", style=COLOR_DIM)
+            version = Text("v0.4.3 · MIT License", style=COLOR_DIM)
 
             # Compose layout
             layout_lines = [
