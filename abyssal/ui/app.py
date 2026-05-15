@@ -242,97 +242,52 @@ def _short_desc(card: Card, lang: str) -> str:
     return desc
 
 
-def _fmt_effect_line(eff, lang: str) -> str:
-    """Format a single CardEffect into a compact display string."""
-    if hasattr(eff, 'type'):
-        etype, val, status, duration, sec = eff.type, eff.value, getattr(eff, 'status', ''), getattr(eff, 'duration', 0), getattr(eff, 'secondary_value', 0)
-    else:
-        etype = eff.get('type', '')
-        val = eff.get('value', 0)
-        status = eff.get('status', '')
-        duration = eff.get('duration', 0)
-        sec = eff.get('secondary_value', 0)
-
-    type_label = t(f"keyword.{etype}", lang)
-    if type_label.startswith("keyword."):
-        type_label = etype  # fallback
-
-    if etype == "damage":
-        return f"⚔{val}"
-    elif etype == "block":
-        return f"🛡{val}"
-    elif etype == "heal":
-        return f"💚{val}"
-    elif etype == "apply_status":
-        status_label = t(f"keyword.{status}", lang)
-        if status_label.startswith("keyword."):
-            status_label = status
-        dur = f"/{duration}" if duration > 0 and duration < 99 else ""
-        return f"{status_label} {val}{dur}"
-    elif etype == "draw":
-        return f"📥{val}"
-    elif etype == "gain_energy":
-        return f"⚡+{val}"
-    elif etype == "damage_self":
-        return f"❤-{val}"
-    elif etype == "aoe":
-        return f"💥{val}"
-    elif etype == "multi_hit":
-        return f"✕{val}"
-    elif etype == "heal_percent":
-        return f"💚{int(val*100)}%"
-    else:
-        return f"{type_label}{val}"
-
-
-def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> str:
-    """Render hand cards as Rich Table — shows full effect details per card."""
+def render_hand_horizontal(hand: list[Card], lang: str, selected_idx: int, energy: int) -> Text:
+    """Render hand as a vertical card list with full text descriptions."""
     if not hand:
-        return ""
+        return Text("")
 
-    # Wider columns for more detail
-    col_width = 16
-    table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1), show_edge=False, show_lines=False)
-    for _ in hand:
-        table.add_column(justify="center", width=col_width, no_wrap=False)
-
-    # Determine max effect count across all cards
-    max_effects = max((len(card.get_effects()) for card in hand), default=0)
-
-    # Row 0: card names
-    names = []
+    out = Text()
     for i, card in enumerate(hand):
-        name = _card_name(card, lang)
-        marker = ">>" if i == selected_idx else "  "
-        names.append(f"{marker}{name}")
-    table.add_row(*names)
-
-    # Row 1: cost + type badge
-    costs = []
-    for i, card in enumerate(hand):
+        is_sel = i == selected_idx
         cost = card.get_cost()
         playable = cost <= energy
-        cost_mark = f"[{cost}]" if playable else f"({cost})"
+        name = _card_name(card, lang)
         ctype = t(f"card.type.{card.card_type.value}", lang)
-        costs.append(f"{cost_mark} {ctype}")
-    table.add_row(*costs)
+        desc = _short_desc(card, lang)
 
-    # Row 2+: one row per effect (up to max_effects)
-    for eff_idx in range(max_effects):
-        eff_row = []
-        for card in hand:
-            effects = card.get_effects()
-            if eff_idx < len(effects):
-                eff_row.append(_fmt_effect_line(effects[eff_idx], lang))
-            else:
-                eff_row.append("")
-        table.add_row(*eff_row)
+        if i > 0:
+            out.append("\n")
 
-    from rich.console import Console as RC
-    tmp = RC(width=200)
-    with tmp.capture() as capture:
-        tmp.print(table)
-    return capture.get().rstrip()
+        # Selection marker
+        marker = ">>" if is_sel else "  "
+        if is_sel:
+            out.append(f"{marker} ", style=COLOR_HIGHLIGHT)
+        else:
+            out.append(f"{marker} ", style=COLOR_DIM)
+
+        # Quick-select key
+        out.append(f"{i+1}: ", style=COLOR_DIM)
+
+        # Cost
+        if playable:
+            out.append(f"[{cost}⚡]", style=COLOR_ENERGY)
+        else:
+            out.append(f"({cost}⚡)", style=COLOR_HP_RED)
+
+        out.append(" ")
+
+        # Card name — color by type
+        card_color = CARD_TYPE_COLOR.get(card.card_type.value, COLOR_BRIGHT)
+        out.append(name, style=card_color)
+
+        out.append(" ", style=COLOR_DIM)
+        out.append(f"({ctype})", style=COLOR_DIM)
+
+        # Full text description
+        out.append(f"  {desc}")
+
+    return out
 
 
 def render_card_mini(card: Card, lang: str = "zh", selected: bool = False, playable: bool = True) -> str:
@@ -490,7 +445,7 @@ class GameApp:
                 f"1-4 {t('menu.select', self.lang)} | L 中文/English | ESC {t('menu.quit', self.lang)}",
                 style=COLOR_DIM,
             )
-            version = Text("v0.4.3 · MIT License", style=COLOR_DIM)
+            version = Text("v0.4.4 · MIT License", style=COLOR_DIM)
 
             # Compose layout
             layout_lines = [
